@@ -39,6 +39,17 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
     });
   };
 
+  // Get product image from the images array if it exists
+  const getProductImage = () => {
+    if (product.image) return product.image;
+    // @ts-ignore - The product might have an 'images' property from external API
+    if (product.images && product.images.length > 0 && product.images[0].url) {
+      // @ts-ignore
+      return product.images[0].url;
+    }
+    return 'https://via.placeholder.com/300x300?text=No+Image';
+  };
+
   const calculateDiscount = () => {
     if (product.originalPrice) {
       return Math.round((1 - product.price / product.originalPrice) * 100);
@@ -55,7 +66,7 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
     >
       <div className="relative md:w-1/4 flex-shrink-0">
         <img 
-          src={product.image} 
+          src={getProductImage()} 
           alt={product.name} 
           className="w-full h-48 md:h-full object-contain bg-neutral-light"
         />
@@ -78,7 +89,33 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
           </div>
           <span className="ml-2 text-sm text-neutral-dark">({Math.floor(Math.random() * 50) + 5})</span>
         </div>
-        <p className="text-neutral-dark flex-grow mb-4">{product.description}</p>
+        
+        {/* Display product information with fallbacks */}
+        <div className="text-neutral-dark flex-grow mb-4">
+          {product.brand && (
+            <p className="mb-2"><span className="font-medium">Brand:</span> {product.brand}</p>
+          )}
+          
+          {/* @ts-ignore - Handle OEM property if exists */}
+          {product.OEM && (
+            <p className="mb-2"><span className="font-medium">OEM:</span> {product.OEM}</p>
+          )}
+          
+          {/* @ts-ignore - Handle model property if exists */}
+          {product.model && (
+            <p className="mb-2"><span className="font-medium">Model:</span> {product.model}</p>
+          )}
+          
+          {/* @ts-ignore - Handle year property if exists */}
+          {product.year && (
+            <p className="mb-2"><span className="font-medium">Year:</span> {product.year}</p>
+          )}
+          
+          {product.description && (
+            <p className="mt-3">{product.description}</p>
+          )}
+        </div>
+        
         <div className="flex flex-wrap justify-between items-center">
           <div className="mb-2 md:mb-0">
             <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>

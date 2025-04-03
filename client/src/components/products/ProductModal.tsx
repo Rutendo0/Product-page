@@ -57,6 +57,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
   if (!product) return null;
 
+  // Get product image from the images array if it exists
+  const getProductImage = () => {
+    if (product.image) return product.image;
+    // @ts-ignore - The product might have an 'images' property from external API
+    if (product.images && product.images.length > 0 && product.images[0].url) {
+      // @ts-ignore
+      return product.images[0].url;
+    }
+    return 'https://via.placeholder.com/300x300?text=No+Image';
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl p-0 overflow-hidden">
@@ -67,7 +78,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/2 p-6 flex items-center justify-center bg-neutral-light">
             <img 
-              src={product.image} 
+              src={getProductImage()} 
               alt={product.name} 
               className="max-h-[400px] object-contain"
             />
@@ -76,9 +87,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
           <div className="md:w-1/2 p-6">
             <div className="flex flex-col h-full">
               <div className="mb-4">
-                <span className="inline-block bg-neutral px-2 py-1 rounded text-xs uppercase tracking-wide mb-2">
-                  {product.category}
-                </span>
+                {product.category && (
+                  <span className="inline-block bg-neutral px-2 py-1 rounded text-xs uppercase tracking-wide mb-2">
+                    {product.category}
+                  </span>
+                )}
                 <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
                 <div className="flex items-center mb-2">
                   <div className="flex text-yellow-400">
@@ -101,17 +114,57 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 </p>
               </div>
               
-              <div className="mb-6">
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-neutral-dark">{product.description}</p>
-              </div>
+              {/* Description section - show if available */}
+              {product.description && (
+                <div className="mb-6">
+                  <h3 className="font-semibold mb-2">Description</h3>
+                  <p className="text-neutral-dark">{product.description}</p>
+                </div>
+              )}
+              
+              {/* Industry information - if available */}
+              {/* @ts-ignore */}
+              {product.industry && (
+                <div className="mb-6">
+                  <h3 className="font-semibold mb-2">Industry</h3>
+                  <p className="text-neutral-dark">
+                    {/* @ts-ignore */}
+                    {product.industry}
+                  </p>
+                </div>
+              )}
               
               <div className="mb-6">
                 <h3 className="font-semibold mb-2">Specifications</h3>
                 <ul className="text-sm space-y-2">
-                  <li><span className="font-medium">Brand:</span> {product.brand || 'Generic'}</li>
-                  <li><span className="font-medium">Part Number:</span> {product.sku || 'N/A'}</li>
-                  <li><span className="font-medium">Compatibility:</span> Multiple Models</li>
+                  {/* Show brand if available */}
+                  {product.brand && (
+                    <li><span className="font-medium">Brand:</span> {product.brand}</li>
+                  )}
+                  
+                  {/* Show OEM if available */}
+                  {/* @ts-ignore */}
+                  {product.OEM && (
+                    <li><span className="font-medium">OEM:</span> {product.OEM}</li>
+                  )}
+                  
+                  {/* Show SKU/part number if available */}
+                  {product.sku && (
+                    <li><span className="font-medium">Part Number:</span> {product.sku}</li>
+                  )}
+                  
+                  {/* Show vehicle model if available */}
+                  {/* @ts-ignore */}
+                  {product.model && (
+                    <li><span className="font-medium">Model:</span> {product.model}</li>
+                  )}
+                  
+                  {/* Show vehicle year if available */}
+                  {/* @ts-ignore */}
+                  {product.year && (
+                    <li><span className="font-medium">Year:</span> {product.year}</li>
+                  )}
+                  
                   <li><span className="font-medium">Warranty:</span> 1 Year</li>
                 </ul>
               </div>

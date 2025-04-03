@@ -39,6 +39,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
     });
   };
 
+  // Get product image from the images array if it exists
+  const getProductImage = () => {
+    if (product.image) return product.image;
+    // @ts-ignore - The product might have an 'images' property from external API
+    if (product.images && product.images.length > 0 && product.images[0].url) {
+      // @ts-ignore
+      return product.images[0].url;
+    }
+    return 'https://via.placeholder.com/300x300?text=No+Image';
+  };
+
   const calculateDiscount = () => {
     if (product.originalPrice) {
       return Math.round((1 - product.price / product.originalPrice) * 100);
@@ -55,7 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     >
       <div className="relative">
         <img 
-          src={product.image} 
+          src={getProductImage()} 
           alt={product.name} 
           className="w-full h-48 object-contain bg-neutral-light"
         />
@@ -85,7 +96,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
           <span className="ml-1 text-xs text-neutral-dark">({Math.floor(Math.random() * 50) + 5})</span>
         </div>
-        <p className="text-neutral-dark text-sm line-clamp-2 mb-3">{product.description}</p>
+        {/* Show brand if available, otherwise description */}
+        {product.brand ? (
+          <p className="text-neutral-dark text-sm mb-3">Brand: {product.brand}</p>
+        ) : (
+          <p className="text-neutral-dark text-sm line-clamp-2 mb-3">{product.description || "No description available"}</p>
+        )}
         <div className="flex justify-between items-center">
           <div>
             <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
