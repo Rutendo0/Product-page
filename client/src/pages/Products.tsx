@@ -5,8 +5,11 @@ import ProductFilterComponent from "@/components/products/ProductFilter";
 import ProductGrid from "@/components/products/ProductGrid";
 import ProductPagination from "@/components/products/ProductPagination";
 import ProductModal from "@/components/products/ProductModal";
-import { FaSearch, FaShoppingCart } from "react-icons/fa";
+import ProductCompare from "@/components/products/ProductCompare";
+import { FaSearch, FaShoppingCart, FaExchangeAlt } from "react-icons/fa";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 // Import the SortOption type from ProductGrid
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
@@ -15,6 +18,7 @@ const PRODUCTS_PER_PAGE = 9;
 
 const Products = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cartItems, setCartItems] = useState<{product: Product, quantity: number}[]>([]);
@@ -23,12 +27,17 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   
+  // Product comparison state
+  const [compareProducts, setCompareProducts] = useState<Product[]>([]);
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  
   // Track selected filters for displaying badges
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   
-  // Calculate cart count
+  // Calculate cart count and compare count
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const compareCount = compareProducts.length;
   
   // Generate query key based on filters and pagination
   const queryKey = [
@@ -191,6 +200,64 @@ const Products = () => {
     setShowMobileFilters(!showMobileFilters);
   };
   
+  // Product comparison methods
+  const handleAddToCompare = (product: Product) => {
+    setCompareProducts(prev => {
+      // Check if product is already in compare list
+      const isAlreadyInCompare = prev.some(p => p.productId === product.productId);
+      
+      if (isAlreadyInCompare) {
+        toast({
+          title: "Already in comparison",
+          description: "This product is already in your comparison list.",
+          duration: 3000,
+        });
+        return prev;
+      }
+      
+      // Check if we've reached the maximum number of items to compare (4)
+      if (prev.length >= 4) {
+        toast({
+          title: "Comparison limit reached",
+          description: "You can compare up to 4 products at a time. Remove a product to add another.",
+          duration: 4000,
+        });
+        return prev;
+      }
+      
+      toast({
+        title: "Added to comparison",
+        description: `${product.name} added to comparison list.`,
+        duration: 3000,
+      });
+      
+      return [...prev, product];
+    });
+  };
+  
+  const handleRemoveFromCompare = (productId: string) => {
+    setCompareProducts(prev => prev.filter(p => p.productId !== productId));
+    
+    toast({
+      title: "Removed from comparison",
+      description: "Product removed from comparison list.",
+      duration: 3000,
+    });
+  };
+  
+  const openCompareModal = () => {
+    if (compareProducts.length === 0) {
+      toast({
+        title: "No products to compare",
+        description: "Add products to your comparison list first.",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    setIsCompareModalOpen(true);
+  };
+  
   return (
     <div className="min-h-screen bg-neutral-light">
       {/* Page title section with gradient background */}
@@ -203,6 +270,19 @@ const Products = () => {
             </div>
             
             <div className="flex items-center gap-4 mt-4 md:mt-0">
+              {/* Compare button with counter and animation */}
+              <button 
+                onClick={openCompareModal}
+                className="relative bg-white hover:bg-white/90 text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105"
+              >
+                <FaExchangeAlt size={20} />
+                {compareCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
+                    {compareCount}
+                  </Badge>
+                )}
+              </button>
+              
               {/* Shopping cart button with counter and animation */}
               <button className="relative bg-white hover:bg-white/90 text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
                 <FaShoppingCart size={22} />
@@ -325,6 +405,7 @@ const Products = () => {
               totalProducts={totalFilteredProducts}
               onProductClick={handleProductClick}
               onAddToCart={handleAddToCart}
+              onAddToCompare={handleAddToCompare}
               onSortChange={handleSortChange}
               onRetry={handleRetry}
               onResetFilters={handleResetFilters}
@@ -346,6 +427,15 @@ const Products = () => {
         product={selectedProduct}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onAddToCart={handleAddToCart}
+      />
+      
+      {/* Product Comparison Modal */}
+      <ProductCompare
+        products={compareProducts}
+        isOpen={isCompareModalOpen}
+        onClose={() => setIsCompareModalOpen(false)}
+        onRemoveProduct={handleRemoveFromCompare}
         onAddToCart={handleAddToCart}
       />
     </div>

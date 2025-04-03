@@ -1,18 +1,20 @@
 import { type Product } from "@shared/schema";
 import { useState } from "react";
-import { FaShoppingCart, FaHeart, FaStar, FaStarHalfAlt } from "react-icons/fa";
+import { FaShoppingCart, FaHeart, FaStar, FaStarHalfAlt, FaExchangeAlt } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProductListItemProps {
   product: Product;
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
+  onAddToCompare?: (product: Product) => void;
 }
 
 const ProductListItem: React.FC<ProductListItemProps> = ({
   product,
   onProductClick,
   onAddToCart,
+  onAddToCompare,
 }) => {
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -37,6 +39,19 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
       description: `${product.name} has been ${isFavorite ? "removed from" : "added to"} your wishlist.`,
       duration: 3000,
     });
+  };
+  
+  const handleAddToCompare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAddToCompare) {
+      onAddToCompare(product);
+      
+      toast({
+        title: "Added to compare",
+        description: `${product.name} has been added to comparison.`,
+        duration: 3000,
+      });
+    }
   };
 
   // Get product image from the images array if it exists
@@ -125,7 +140,7 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
               </span>
             )}
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap gap-2">
             <button 
               className={`border border-primary ${isFavorite ? 'bg-primary text-white' : 'text-primary hover:bg-primary hover:text-white'} px-3 py-2 rounded-lg transition-colors`}
               onClick={handleFavoriteClick}
@@ -133,6 +148,15 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
             >
               <FaHeart className="mr-1 inline-block" /> Wishlist
             </button>
+            {onAddToCompare && (
+              <button 
+                className="border border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white px-3 py-2 rounded-lg transition-colors"
+                onClick={handleAddToCompare}
+                aria-label="Add to compare"
+              >
+                <FaExchangeAlt className="mr-1 inline-block" /> Compare
+              </button>
+            )}
             <button 
               className="bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-lg transition-colors add-to-cart-btn"
               onClick={handleAddToCart}

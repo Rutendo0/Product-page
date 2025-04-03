@@ -6,8 +6,26 @@ import {
   DialogContent, 
   DialogClose,
 } from "@/components/ui/dialog";
-import { FaStar, FaStarHalfAlt, FaCheckCircle, FaHeart } from "react-icons/fa";
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+import { 
+  FaStar, 
+  FaStarHalfAlt, 
+  FaCheckCircle, 
+  FaHeart, 
+  FaShippingFast, 
+  FaArrowLeft, 
+  FaArrowRight,
+  FaInfoCircle,
+  FaTools,
+  FaClipboardList
+} from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductModalProps {
   product: Product | null;
@@ -23,11 +41,14 @@ const ProductModal: React.FC<ProductModalProps> = ({
   onAddToCart,
 }) => {
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isComparing, setIsComparing] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
       setQuantity(1);
+      setCurrentImageIndex(0);
     }
   }, [isOpen]);
 
@@ -55,45 +76,153 @@ const ProductModal: React.FC<ProductModalProps> = ({
     setQuantity(quantity + 1);
   };
 
+  const toggleCompare = () => {
+    setIsComparing(!isComparing);
+    
+    if (!isComparing) {
+      toast({
+        title: "Added to compare",
+        description: "Product added to comparison list",
+        duration: 3000,
+      });
+    }
+  };
+
   if (!product) return null;
 
-  // Get product image from the images array if it exists
-  const getProductImage = () => {
-    if (product.image) return product.image;
-    // @ts-ignore - The product might have an 'images' property from external API
-    if (product.images && product.images.length > 0 && product.images[0].url) {
-      // @ts-ignore
-      return product.images[0].url;
+  // Get all product images
+  const getProductImages = () => {
+    const images = [];
+    
+    if (product.image) {
+      images.push(product.image);
     }
-    return 'https://via.placeholder.com/300x300?text=No+Image';
+    
+    // @ts-ignore - The product might have an 'images' property from external API
+    if (product.images && product.images.length > 0) {
+      // @ts-ignore
+      product.images.forEach(img => images.push(img.url));
+    }
+    
+    return images.length > 0 ? images : ['https://via.placeholder.com/300x300?text=No+Image'];
+  };
+  
+  const productImages = getProductImages();
+  
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === productImages.length - 1 ? 0 : prev + 1
+    );
+  };
+  
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? productImages.length - 1 : prev - 1
+    );
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-4xl p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-4xl p-0 overflow-hidden max-h-[95vh] overflow-y-auto">
         <DialogClose className="absolute top-4 right-4 text-neutral-dark hover:text-secondary z-10">
           <FaXmark className="h-5 w-5" />
         </DialogClose>
         
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-1/2 p-6 flex items-center justify-center bg-neutral-light">
-            <img 
-              src={getProductImage()} 
-              alt={product.name} 
-              className="max-h-[400px] object-contain"
-            />
+        <div className="flex flex-col lg:flex-row">
+          {/* Image section with gallery */}
+          <div className="lg:w-1/2 p-6 bg-neutral-50">
+            <div className="relative">
+              {/* Main product image */}
+              <div className="w-full h-[300px] md:h-[350px] bg-white rounded-lg mb-4 flex items-center justify-center overflow-hidden relative">
+                {productImages.length > 1 && (
+                  <>
+                    <button 
+                      onClick={prevImage} 
+                      className="absolute left-2 z-10 bg-white/80 hover:bg-white p-2 rounded-full shadow text-primary"
+                    >
+                      <FaArrowLeft size={16} />
+                    </button>
+                    <button 
+                      onClick={nextImage} 
+                      className="absolute right-2 z-10 bg-white/80 hover:bg-white p-2 rounded-full shadow text-primary"
+                    >
+                      <FaArrowRight size={16} />
+                    </button>
+                  </>
+                )}
+                <img 
+                  src={productImages[currentImageIndex]} 
+                  alt={`${product.name} - Image ${currentImageIndex + 1}`} 
+                  className="max-h-full max-w-full object-contain p-4"
+                />
+              </div>
+              
+              {/* Thumbnail gallery */}
+              {productImages.length > 1 && (
+                <div className="flex space-x-2 overflow-x-auto pb-2">
+                  {productImages.map((image, index) => (
+                    <button 
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`flex-shrink-0 w-16 h-16 rounded border-2 overflow-hidden ${
+                        index === currentImageIndex 
+                          ? 'border-primary' 
+                          : 'border-transparent hover:border-primary/30'
+                      }`}
+                    >
+                      <img 
+                        src={image} 
+                        alt={`Thumbnail ${index + 1}`} 
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Additional product information highlights */}
+            <div className="mt-4 bg-white rounded-lg p-4 shadow-sm">
+              <h3 className="text-sm font-medium mb-2">Why Choose This Product</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center">
+                  <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
+                  <span>High Quality</span>
+                </div>
+                <div className="flex items-center">
+                  <FaShippingFast className="text-primary mr-2 flex-shrink-0" />
+                  <span>Fast Shipping</span>
+                </div>
+                {product.brand && (
+                  <div className="flex items-center">
+                    <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
+                    <span>Trusted Brand</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
+                  <span>1 Year Warranty</span>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div className="md:w-1/2 p-6">
+          {/* Product details section */}
+          <div className="lg:w-1/2 p-6">
             <div className="flex flex-col h-full">
-              <div className="mb-4">
+              <div className="mb-6">
+                {/* Category badge */}
                 {product.category && (
-                  <span className="inline-block bg-neutral px-2 py-1 rounded text-xs uppercase tracking-wide mb-2">
+                  <Badge variant="outline" className="mb-2">
                     {product.category}
-                  </span>
+                  </Badge>
                 )}
+                
+                {/* Product title */}
                 <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
-                <div className="flex items-center mb-2">
+                
+                {/* Ratings */}
+                <div className="flex items-center mb-3">
                   <div className="flex text-yellow-400">
                     <FaStar />
                     <FaStar />
@@ -101,75 +230,155 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     <FaStar />
                     <FaStarHalfAlt />
                   </div>
-                  <span className="ml-2 text-sm text-neutral-dark">(24 reviews)</span>
+                  <span className="ml-2 text-sm text-muted-foreground">(24 reviews)</span>
                 </div>
-                <div className="mb-2">
-                  <span className="text-2xl font-bold text-secondary">${product.price.toFixed(2)}</span>
+                
+                {/* Price */}
+                <div className="mb-3">
+                  <span className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</span>
                   {product.originalPrice && (
-                    <span className="text-sm line-through text-neutral-dark ml-2">${product.originalPrice.toFixed(2)}</span>
+                    <span className="text-sm line-through text-muted-foreground ml-2">
+                      ${product.originalPrice.toFixed(2)}
+                    </span>
                   )}
                 </div>
-                <p className="text-green-600 mb-4">
-                  <FaCheckCircle className="inline-block mr-1" /> In stock
+                
+                {/* Stock status */}
+                <p className="text-green-600 font-medium flex items-center mb-4">
+                  <FaCheckCircle className="mr-2" /> In Stock & Ready to Ship
                 </p>
               </div>
               
-              {/* Description section - show if available */}
-              {product.description && (
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-neutral-dark">{product.description}</p>
-                </div>
-              )}
-              
-              {/* Industry information - if available */}
-              {/* @ts-ignore */}
-              {product.industry && (
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-2">Industry</h3>
-                  <p className="text-neutral-dark">
+              {/* Tabbed content for product details */}
+              <Tabs defaultValue="details" className="mb-6">
+                <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="details" className="flex items-center">
+                    <FaInfoCircle className="mr-2" /> Details
+                  </TabsTrigger>
+                  <TabsTrigger value="specs" className="flex items-center">
+                    <FaTools className="mr-2" /> Specifications
+                  </TabsTrigger>
+                  <TabsTrigger value="compatibility" className="flex items-center">
+                    <FaClipboardList className="mr-2" /> Compatibility
+                  </TabsTrigger>
+                </TabsList>
+                
+                {/* Details tab */}
+                <TabsContent value="details" className="space-y-4 mt-4">
+                  {product.description && (
+                    <div className="space-y-2">
+                      <h3 className="font-medium">Description</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {product.description || "This premium automotive part is designed for optimal performance and longevity. Engineered with high-quality materials to meet or exceed OEM specifications."}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* @ts-ignore */}
+                  {product.industry && (
+                    <div className="space-y-2">
+                      <h3 className="font-medium">Industry</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {/* @ts-ignore */}
+                        {product.industry}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <h3 className="font-medium">Features</h3>
+                    <ul className="text-sm space-y-1 text-muted-foreground">
+                      <li>• Premium quality construction</li>
+                      <li>• Direct OEM replacement</li>
+                      <li>• Easy installation process</li>
+                      <li>• Tested for reliability and durability</li>
+                    </ul>
+                  </div>
+                </TabsContent>
+                
+                {/* Specifications tab */}
+                <TabsContent value="specs" className="space-y-4 mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Brand */}
+                    {product.brand && (
+                      <div className="space-y-1">
+                        <h3 className="text-xs font-medium text-muted-foreground">BRAND</h3>
+                        <p className="font-medium">{product.brand}</p>
+                      </div>
+                    )}
+                    
+                    {/* OEM */}
                     {/* @ts-ignore */}
-                    {product.industry}
-                  </p>
-                </div>
-              )}
+                    {product.OEM && (
+                      <div className="space-y-1">
+                        <h3 className="text-xs font-medium text-muted-foreground">OEM NUMBER</h3>
+                        {/* @ts-ignore */}
+                        <p className="font-medium">{product.OEM}</p>
+                      </div>
+                    )}
+                    
+                    {/* SKU/Part Number */}
+                    {product.sku && (
+                      <div className="space-y-1">
+                        <h3 className="text-xs font-medium text-muted-foreground">PART NUMBER</h3>
+                        <p className="font-medium">{product.sku}</p>
+                      </div>
+                    )}
+                    
+                    {/* Weight (example) */}
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-medium text-muted-foreground">WARRANTY</h3>
+                      <p className="font-medium">12 Months</p>
+                    </div>
+                    
+                    {/* Dimensions (example) */}
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-medium text-muted-foreground">RETURN POLICY</h3>
+                      <p className="font-medium">30 Days</p>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                {/* Compatibility tab */}
+                <TabsContent value="compatibility" className="space-y-4 mt-4">
+                  {/* @ts-ignore */}
+                  {(product.model || product.year) ? (
+                    <div className="space-y-2">
+                      <h3 className="font-medium">Compatible Vehicles</h3>
+                      <div className="bg-neutral-50 rounded-md p-4">
+                        {/* @ts-ignore */}
+                        {product.model && (
+                          <div className="flex mb-2">
+                            <span className="font-medium w-20">Model:</span>
+                            {/* @ts-ignore */}
+                            <span>{product.model}</span>
+                          </div>
+                        )}
+                        {/* @ts-ignore */}
+                        {product.year && (
+                          <div className="flex">
+                            <span className="font-medium w-20">Year:</span>
+                            {/* @ts-ignore */}
+                            <span>{product.year}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        No specific compatibility information available for this product.
+                      </p>
+                      <p className="text-sm mt-2">
+                        Please check your vehicle specifications or contact customer support for compatibility information.
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
               
-              <div className="mb-6">
-                <h3 className="font-semibold mb-2">Specifications</h3>
-                <ul className="text-sm space-y-2">
-                  {/* Show brand if available */}
-                  {product.brand && (
-                    <li><span className="font-medium">Brand:</span> {product.brand}</li>
-                  )}
-                  
-                  {/* Show OEM if available */}
-                  {/* @ts-ignore */}
-                  {product.OEM && (
-                    <li><span className="font-medium">OEM:</span> {product.OEM}</li>
-                  )}
-                  
-                  {/* Show SKU/part number if available */}
-                  {product.sku && (
-                    <li><span className="font-medium">Part Number:</span> {product.sku}</li>
-                  )}
-                  
-                  {/* Show vehicle model if available */}
-                  {/* @ts-ignore */}
-                  {product.model && (
-                    <li><span className="font-medium">Model:</span> {product.model}</li>
-                  )}
-                  
-                  {/* Show vehicle year if available */}
-                  {/* @ts-ignore */}
-                  {product.year && (
-                    <li><span className="font-medium">Year:</span> {product.year}</li>
-                  )}
-                  
-                  <li><span className="font-medium">Warranty:</span> 1 Year</li>
-                </ul>
-              </div>
-              
-              <div className="mt-auto">
+              {/* Quantity selector and action buttons */}
+              <div className="mt-auto border-t pt-4">
                 <div className="flex items-center mb-4">
                   <div className="mr-4">
                     <label htmlFor="modal-quantity" className="block text-sm font-medium mb-1">Quantity</label>
@@ -198,9 +407,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Add to cart button */}
                   <button 
                     onClick={handleAddToCart}
-                    className="flex-1 bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-lg flex justify-center items-center"
+                    className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg flex justify-center items-center"
                   >
                     <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M8 10H5L3 18H21L19 10H16M8 10V6C8 3.79086 9.79086 2 12 2V2C14.2091 2 16 3.79086 16 6V10M8 10H16" 
@@ -208,8 +418,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     </svg>
                     Add to Cart
                   </button>
-                  <button className="flex-shrink-0 border border-primary hover:bg-primary hover:text-white text-primary font-bold py-3 px-4 rounded-lg transition-colors">
-                    <FaHeart className="inline-block" />
+                  
+                  {/* Compare button */}
+                  <button 
+                    onClick={toggleCompare}
+                    className={`flex-shrink-0 border font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center ${
+                      isComparing 
+                        ? 'bg-primary text-white border-primary' 
+                        : 'border-gray-300 hover:border-primary text-gray-700 hover:text-primary'
+                    }`}
+                  >
+                    {isComparing ? 'Added to Compare' : 'Compare'}
                   </button>
                 </div>
               </div>

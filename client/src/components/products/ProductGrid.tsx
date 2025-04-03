@@ -15,6 +15,7 @@ interface ProductGridProps {
   totalProducts: number;
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
+  onAddToCompare?: (product: Product) => void;  // Optional function to add product to comparison
   onSortChange: (sortOption: SortOption) => void;
   onRetry: () => void;
   onResetFilters: () => void;
@@ -27,6 +28,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   totalProducts,
   onProductClick,
   onAddToCart,
+  onAddToCompare,
   onSortChange,
   onRetry,
   onResetFilters,
@@ -221,6 +223,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               product={product}
               onProductClick={onProductClick}
               onAddToCart={onAddToCart}
+              onAddToCompare={onAddToCompare}
             />
           ))}
         </div>
@@ -235,6 +238,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               product={product}
               onProductClick={onProductClick}
               onAddToCart={onAddToCart}
+              onAddToCompare={onAddToCompare}
             />
           ))}
         </div>

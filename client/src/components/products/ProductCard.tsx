@@ -1,18 +1,20 @@
 import { type Product } from "@shared/schema";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { FaShoppingCart, FaHeart, FaStar, FaStarHalfAlt } from "react-icons/fa";
+import { FaShoppingCart, FaHeart, FaStar, FaStarHalfAlt, FaExchangeAlt } from "react-icons/fa";
 
 interface ProductCardProps {
   product: Product;
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
+  onAddToCompare?: (product: Product) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onProductClick,
   onAddToCart,
+  onAddToCompare,
 }) => {
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -37,6 +39,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
       description: `${product.name} has been ${isFavorite ? "removed from" : "added to"} your wishlist.`,
       duration: 3000,
     });
+  };
+  
+  const handleAddToCompare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAddToCompare) {
+      onAddToCompare(product);
+      
+      toast({
+        title: "Added to compare",
+        description: `${product.name} has been added to comparison.`,
+        duration: 3000,
+      });
+    }
   };
 
   // Get product image from the images array if it exists
@@ -90,6 +105,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             <FaShoppingCart />
           </button>
+          {onAddToCompare && (
+            <button 
+              className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-amber-500 transition-colors"
+              onClick={handleAddToCompare}
+              aria-label="Add to compare"
+            >
+              <FaExchangeAlt />
+            </button>
+          )}
         </div>
         {product.stock === 0 && (
           <div className="absolute bottom-0 left-0 right-0 bg-neutral-800 bg-opacity-75 text-white text-center py-1 text-sm">
