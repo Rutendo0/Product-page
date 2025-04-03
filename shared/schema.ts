@@ -52,13 +52,20 @@ export type ProductFilter = z.infer<typeof productFilterSchema>;
 
 // External API product schema
 export const externalProductSchema = z.object({
-  id: z.string(),
+  id: z.union([z.string(), z.number().transform(val => val.toString())]),
   name: z.string(),
   description: z.string(),
-  price: z.string().transform(val => parseFloat(val)),
+  price: z.union([
+    z.string().transform(val => parseFloat(val)),
+    z.number()
+  ]),
   image: z.string(),
   category: z.string().optional(),
-  originalPrice: z.string().optional().transform(val => val ? parseFloat(val) : undefined),
+  originalPrice: z.union([
+    z.string().transform(val => parseFloat(val)),
+    z.number(),
+    z.undefined()
+  ]).optional(),
   brand: z.string().optional(),
   sku: z.string().optional(),
 });
