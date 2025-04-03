@@ -2,6 +2,8 @@ import { type Product } from "@shared/schema";
 import { useState } from "react";
 import { FaShoppingCart, FaHeart, FaStar, FaStarHalfAlt, FaExchangeAlt } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
+import { useTiltEffect } from "@/hooks/use-tilt-effect";
+import "./ProductShineEffect.css";
 
 interface ProductListItemProps {
   product: Product;
@@ -18,6 +20,20 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
 }) => {
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
+  
+  // Use our custom tilt effect hook with some configuration options
+  const { 
+    tiltRef, 
+    tiltStyles, 
+    handleMouseMove, 
+    handleMouseEnter, 
+    handleMouseLeave 
+  } = useTiltEffect({
+    max: 5,             // Less tilt for list items
+    perspective: 1500,  // More subtle perspective
+    scale: 1.02,        // Slightly less scale for list items
+    speed: 400,         // Transition speed in ms
+  });
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -76,14 +92,19 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
 
   return (
     <div 
-      className="bg-white rounded-lg shadow overflow-hidden flex flex-col md:flex-row transition-all hover:shadow-lg cursor-pointer"
+      ref={tiltRef}
+      style={tiltStyles}
+      className="product-card bg-white rounded-lg shadow overflow-hidden flex flex-col md:flex-row transform-gpu will-change-transform cursor-pointer"
       onClick={() => onProductClick(product)}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative md:w-1/4 flex-shrink-0">
         <img 
           src={getProductImage()} 
           alt={product.name} 
-          className="w-full h-48 md:h-full object-contain bg-neutral-light"
+          className="product-image w-full h-48 md:h-full object-contain bg-neutral-light"
         />
         {discount > 0 && (
           <span className="absolute top-2 left-2 bg-secondary text-white text-xs font-bold px-2 py-1 rounded">
