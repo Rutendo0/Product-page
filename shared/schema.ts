@@ -34,7 +34,17 @@ export const products = pgTable("products", {
 
 export const productSchema = createInsertSchema(products);
 
-export type Product = typeof products.$inferSelect;
+// Extend the base Product type with additional fields from the API
+export type Product = typeof products.$inferSelect & {
+  // Optional additional fields from external API
+  OEM?: string;
+  model?: string;
+  year?: number;
+  industry?: string;
+  // These will be used for images array from external API
+  images?: { url: string }[];
+};
+
 export type InsertProduct = typeof products.$inferInsert;
 
 // Product filtering schema
@@ -54,12 +64,16 @@ export type ProductFilter = z.infer<typeof productFilterSchema>;
 export const externalProductSchema = z.object({
   id: z.union([z.string(), z.number().transform(val => val.toString())]),
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   price: z.union([
     z.string().transform(val => parseFloat(val)),
     z.number()
   ]),
-  image: z.string(),
+  image: z.string().optional(),
+  // Images array from the API
+  images: z.array(z.object({
+    url: z.string()
+  })).optional(),
   category: z.string().optional(),
   originalPrice: z.union([
     z.string().transform(val => parseFloat(val)),
@@ -68,6 +82,13 @@ export const externalProductSchema = z.object({
   ]).optional(),
   brand: z.string().optional(),
   sku: z.string().optional(),
+  // Additional fields from the external API
+  OEM: z.string().optional(),
+  model: z.string().optional(),
+  year: z.number().optional(),
+  industry: z.string().optional(),
+  isFeatured: z.boolean().optional(),
+  isArchived: z.boolean().optional(),
 });
 
 export type ExternalProduct = z.infer<typeof externalProductSchema>;

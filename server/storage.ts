@@ -67,6 +67,18 @@ export class MemStorage implements IStorage {
         
         // Manually map the data to our internal format instead of using Zod validation
         for (const item of data) {
+          // Get image URL from different possible sources in the API data
+          let imageUrl = 'https://via.placeholder.com/150';
+          
+          // Check if item has images array
+          if (item.images && Array.isArray(item.images) && item.images.length > 0 && item.images[0].url) {
+            imageUrl = item.images[0].url;
+          } 
+          // Fallback to image property if images array is not available
+          else if (item.image) {
+            imageUrl = item.image;
+          }
+          
           const product: Product = {
             id: this.currentId++,
             productId: typeof item.id === 'number' ? item.id.toString() : item.id || `prod-${Math.random()}`,
@@ -74,13 +86,25 @@ export class MemStorage implements IStorage {
             description: item.description || 'No description available',
             price: typeof item.price === 'string' ? parseFloat(item.price) : (item.price || 0),
             originalPrice: typeof item.originalPrice === 'string' ? parseFloat(item.originalPrice) : item.originalPrice,
-            image: item.image || 'https://via.placeholder.com/150',
+            image: imageUrl,
             category: item.category || 'Other',
             brand: item.brand || 'Generic',
             stock: Math.floor(Math.random() * 50) + 1, // Random stock
             sku: item.sku || `SKU-${Math.floor(Math.random() * 10000)}`,
             createdAt: new Date(),
           };
+          
+          // Add custom properties from external API for frontend use
+          // We'll store these properties but they won't be in our schema
+          // @ts-ignore - Adding additional properties to match external API
+          if (item.OEM) product.OEM = item.OEM;
+          // @ts-ignore
+          if (item.model) product.model = item.model;
+          // @ts-ignore
+          if (item.year) product.year = item.year;
+          // @ts-ignore
+          if (item.industry) product.industry = item.industry;
+                    
           this.products.set(product.productId, product);
         }
       } catch (error) {
