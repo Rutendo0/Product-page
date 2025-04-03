@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type Product, type ProductFilter } from "@shared/schema";
-import ProductFilter from "@/components/products/ProductFilter";
+import ProductFilterComponent from "@/components/products/ProductFilter";
 import ProductGrid from "@/components/products/ProductGrid";
 import ProductPagination from "@/components/products/ProductPagination";
 import ProductModal from "@/components/products/ProductModal";
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
 import { Badge } from "@/components/ui/badge";
+
+// Import the SortOption type from ProductGrid
+type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 
 const PRODUCTS_PER_PAGE = 9;
 
@@ -138,11 +141,16 @@ const Products = () => {
     }));
   }, []);
   
-  const handleSortChange = (sortOption: string) => {
-    setFilters(prev => ({
-      ...prev,
-      sort: sortOption as any
-    }));
+  const handleSortChange = (sortOption: SortOption) => {
+    console.log("Products.tsx received sort change:", sortOption);
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        sort: sortOption
+      };
+      console.log("New filters after sort:", newFilters);
+      return newFilters;
+    });
   };
   
   const handlePageChange = (page: number) => {
@@ -234,7 +242,7 @@ const Products = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar with filters - conditionally shown on mobile */}
           <aside className={`lg:w-1/4 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
-            <ProductFilter 
+            <ProductFilterComponent 
               onFilterChange={handleFilterChange}
               onResetFilters={handleResetFilters}
             />

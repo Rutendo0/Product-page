@@ -5,6 +5,9 @@ import ProductListItem from "./ProductListItem";
 import { FaThLarge, FaList } from "react-icons/fa";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// Define sort option type for better type safety
+type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
+
 interface ProductGridProps {
   products: Product[];
   isLoading: boolean;
@@ -12,7 +15,7 @@ interface ProductGridProps {
   totalProducts: number;
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
-  onSortChange: (sortOption: string) => void;
+  onSortChange: (sortOption: SortOption) => void;
   onRetry: () => void;
   onResetFilters: () => void;
 }
@@ -29,6 +32,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   onResetFilters,
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortOption, setSortOption] = useState<SortOption>("featured");
 
   const handleViewChange = (mode: 'grid' | 'list') => {
     setViewMode(mode);
@@ -78,8 +82,12 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             <div className="flex items-center">
               <label htmlFor="sort-products" className="mr-2 text-sm">Sort by:</label>
               <Select
-                onValueChange={onSortChange}
-                defaultValue="featured"
+                value={sortOption}
+                onValueChange={(value: SortOption) => {
+                  console.log("Sort changed to:", value);
+                  setSortOption(value);
+                  onSortChange(value);
+                }}
               >
                 <SelectTrigger id="sort-products" className="w-[180px]">
                   <SelectValue placeholder="Featured" />
