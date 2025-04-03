@@ -23,6 +23,10 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   
+  // Track selected filters for displaying badges
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  
   // Calculate cart count
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   
@@ -135,10 +139,23 @@ const Products = () => {
   };
   
   const handleFilterChange = useCallback((newFilters: Partial<ProductFilter>) => {
-    setFilters(prev => ({
-      ...prev,
-      ...newFilters
-    }));
+    setFilters(prev => {
+      const updatedFilters = {
+        ...prev,
+        ...newFilters
+      };
+      
+      // Update selected categories and brands for badge display
+      if (newFilters.categories !== undefined) {
+        setSelectedCategories(newFilters.categories || []);
+      }
+      
+      if (newFilters.brands !== undefined) {
+        setSelectedBrands(newFilters.brands || []);
+      }
+      
+      return updatedFilters;
+    });
   }, []);
   
   const handleSortChange = (sortOption: SortOption) => {
@@ -162,6 +179,8 @@ const Products = () => {
     setFilters({});
     setSearchQuery("");
     setCurrentPage(1);
+    setSelectedCategories([]);
+    setSelectedBrands([]);
   };
   
   const handleRetry = () => {
@@ -174,21 +193,21 @@ const Products = () => {
   
   return (
     <div className="min-h-screen bg-neutral-light">
-      {/* Page title section */}
-      <section className="bg-primary text-white py-10">
+      {/* Page title section with gradient background */}
+      <section className="bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-white py-12 shadow-lg">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold">Car Parts Catalog</h1>
-              <p className="mt-2 text-neutral-light">Quality automotive parts for all your needs</p>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div className="max-w-2xl">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Auto Parts Marketplace</h1>
+              <p className="mt-3 text-lg text-white/90 max-w-xl">Premium quality automotive parts for all makes and models. Find exactly what you need.</p>
             </div>
             
             <div className="flex items-center gap-4 mt-4 md:mt-0">
-              {/* Shopping cart button with counter */}
-              <button className="relative bg-secondary/90 hover:bg-secondary text-white p-3 rounded-full">
-                <FaShoppingCart size={20} />
+              {/* Shopping cart button with counter and animation */}
+              <button className="relative bg-white hover:bg-white/90 text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
+                <FaShoppingCart size={22} />
                 {cartCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center">
+                  <Badge className="absolute -top-2 -right-2 bg-rose-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
                     {cartCount}
                   </Badge>
                 )}
@@ -196,69 +215,104 @@ const Products = () => {
             </div>
           </div>
           
-          {/* Search bar */}
-          <div className="mt-6 relative">
-            <div className="flex">
+          {/* Enhanced search bar with shadow and better styling */}
+          <div className="mt-6 relative max-w-3xl mx-auto">
+            <div className="flex shadow-lg rounded-lg overflow-hidden">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for parts by name, description, brand..."
-                className="w-full px-4 py-3 pl-12 rounded-l-lg border-0 focus:ring-2 focus:ring-secondary"
+                placeholder="Search for parts by name, brand, category..."
+                className="w-full px-4 py-4 pl-12 rounded-l-lg border-0 focus:ring-2 focus:ring-primary focus:outline-none text-neutral-800"
               />
               <button 
                 onClick={handleResetFilters}
-                className="bg-secondary text-white px-4 py-3 rounded-r-lg hover:bg-secondary/90"
+                className="bg-white text-primary font-medium px-6 py-4 hover:bg-primary/10 transition-colors"
               >
-                Reset
+                Clear
+              </button>
+              <button 
+                onClick={() => console.log("Search triggered")}
+                className="bg-white text-primary font-medium px-6 py-4 rounded-r-lg hover:bg-primary/10 transition-colors"
+              >
+                Search
               </button>
             </div>
-            <FaSearch className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
+            <div className="absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400">
+              <FaSearch size={16} />
+            </div>
           </div>
           
-          <div className="flex flex-wrap mt-4 gap-2">
-            <span className="bg-primary-light px-3 py-1 rounded-full text-sm">Original Equipment</span>
-            <span className="bg-primary-light px-3 py-1 rounded-full text-sm">Aftermarket</span>
-            <span className="bg-primary-light px-3 py-1 rounded-full text-sm">Performance Parts</span>
+          {/* Popular categories */}
+          <div className="flex flex-wrap mt-6 gap-2 justify-center">
+            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Original Equipment</span>
+            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Aftermarket</span>
+            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Performance Parts</span>
+            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Special Offers</span>
           </div>
         </div>
       </section>
 
       {/* Main content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Mobile filter toggle */}
-        <div className="lg:hidden mb-4">
+      <main className="container mx-auto px-4 py-10 -mt-6">
+        {/* Mobile filter toggle - improved styling */}
+        <div className="lg:hidden mb-6">
           <button
             onClick={toggleMobileFilters}
-            className="w-full bg-white text-primary font-semibold py-3 px-4 rounded-lg shadow border border-neutral flex justify-between items-center"
+            className="w-full bg-white text-primary font-semibold py-4 px-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral/10 flex justify-between items-center"
           >
-            <span>Filters & Options</span>
-            <svg className={`w-5 h-5 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <span className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              Filters & Options
+            </span>
+            <svg className={`w-5 h-5 transition-transform duration-300 ${showMobileFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
         </div>
         
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar with filters - conditionally shown on mobile */}
-          <aside className={`lg:w-1/4 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
-            <ProductFilterComponent 
-              onFilterChange={handleFilterChange}
-              onResetFilters={handleResetFilters}
-            />
+          {/* Sidebar with filters - improved with animation */}
+          <aside className={`lg:w-1/4 transition-all duration-300 transform ${showMobileFilters ? 'opacity-100 scale-100' : 'opacity-0 scale-95 lg:opacity-100 lg:scale-100'} ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="sticky top-4">
+              <ProductFilterComponent 
+                onFilterChange={handleFilterChange}
+                onResetFilters={handleResetFilters}
+              />
+            </div>
           </aside>
 
           {/* Products section */}
           <div className="lg:w-3/4">
-            {/* Results count and alert message */}
+            {/* Results count and alert message - improved styling */}
             {!isLoading && (
-              <div className="bg-white rounded-lg shadow p-4 mb-6">
-                <p className="text-neutral-dark">
-                  Showing <span className="font-semibold">{filteredProducts.length}</span> of <span className="font-semibold">{totalFilteredProducts}</span> products
-                </p>
+              <div className="bg-white rounded-xl shadow-md p-5 mb-6 border border-neutral/10">
+                <div className="flex flex-wrap justify-between items-center">
+                  <p className="text-neutral-dark">
+                    Showing <span className="font-semibold text-primary">{filteredProducts.length}</span> of <span className="font-semibold text-primary">{totalFilteredProducts}</span> products
+                  </p>
+                  
+                  {(selectedBrands.length > 0 || selectedCategories.length > 0) && (
+                    <div className="flex flex-wrap gap-2 mt-2 lg:mt-0">
+                      {selectedCategories.map((cat: string) => (
+                        <Badge key={cat} className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer px-3 py-1">
+                          {cat} ×
+                        </Badge>
+                      ))}
+                      {selectedBrands.map((brand: string) => (
+                        <Badge key={brand} className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer px-3 py-1">
+                          {brand} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
                 {searchQuery && (
-                  <div className="mt-2 text-sm bg-blue-50 text-blue-800 p-2 rounded">
-                    Search results for: <span className="font-semibold">"{searchQuery}"</span>
+                  <div className="mt-3 text-sm bg-blue-50 text-blue-800 p-3 rounded-lg border border-blue-100">
+                    <span className="font-medium">Search results for:</span> <span className="font-semibold">"{searchQuery}"</span>
                   </div>
                 )}
               </div>

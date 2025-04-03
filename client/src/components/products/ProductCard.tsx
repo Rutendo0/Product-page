@@ -61,33 +61,47 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div 
-      className="bg-white rounded-lg shadow overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+      className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group border border-transparent hover:border-primary/20"
       onClick={() => onProductClick(product)}
     >
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <img 
           src={getProductImage()} 
           alt={product.name} 
-          className="w-full h-48 object-contain bg-neutral-light"
+          className="w-full h-52 object-contain bg-neutral-50 p-2 transition-transform duration-300 group-hover:scale-105"
         />
         {discount > 0 && (
-          <span className="absolute top-2 left-2 bg-secondary text-white text-xs font-bold px-2 py-1 rounded">
+          <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm transform -rotate-3">
             {discount}% OFF
           </span>
         )}
-        <button 
-          className="absolute top-2 right-2 bg-white bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-secondary transition-colors"
-          onClick={handleFavoriteClick}
-          aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          <FaHeart className={isFavorite ? "text-secondary" : ""} />
-        </button>
+        <div className="absolute right-0 top-2 transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:right-2 flex flex-col gap-2">
+          <button 
+            className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-rose-500 transition-colors"
+            onClick={handleFavoriteClick}
+            aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <FaHeart className={isFavorite ? "text-rose-500" : ""} />
+          </button>
+          <button 
+            className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-primary transition-colors"
+            onClick={handleAddToCart}
+            aria-label="Add to cart"
+          >
+            <FaShoppingCart />
+          </button>
+        </div>
+        {product.stock === 0 && (
+          <div className="absolute bottom-0 left-0 right-0 bg-neutral-800 bg-opacity-75 text-white text-center py-1 text-sm">
+            Out of Stock
+          </div>
+        )}
       </div>
       <div className="p-4">
-        <div className="mb-1 text-sm text-neutral-dark">{product.category || 'General'}</div>
-        <h3 className="font-semibold text-lg mb-2 hover:text-secondary line-clamp-1">{product.name}</h3>
+        <div className="mb-1 text-sm font-medium text-primary/70">{product.category || 'General'}</div>
+        <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
         <div className="flex items-center mb-2">
-          <div className="flex text-yellow-400 text-sm">
+          <div className="flex text-amber-400 text-sm">
             <FaStar />
             <FaStar />
             <FaStar />
@@ -98,11 +112,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         {/* Show brand if available, otherwise description */}
         {product.brand ? (
-          <p className="text-neutral-dark text-sm mb-3">Brand: {product.brand}</p>
+          <p className="text-neutral-dark text-sm mb-3">Brand: <span className="font-medium">{product.brand}</span></p>
         ) : (
           <p className="text-neutral-dark text-sm line-clamp-2 mb-3">{product.description || "No description available"}</p>
         )}
-        <div className="flex justify-between items-center">
+        <div className="pt-2 border-t flex justify-between items-center">
           <div>
             <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
             {product.originalPrice && (
@@ -112,7 +126,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </div>
           <button 
-            className="bg-primary hover:bg-primary-light text-white p-2 rounded-full transition-colors add-to-cart-btn"
+            className="bg-primary hover:bg-primary/90 text-white p-2 rounded-full shadow-sm transition-all hover:shadow-md hover:scale-105 add-to-cart-btn"
             onClick={handleAddToCart}
             aria-label="Add to cart"
           >
