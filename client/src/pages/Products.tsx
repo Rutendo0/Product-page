@@ -26,19 +26,21 @@ const Products = () => {
   // Generate query key based on filters and pagination
   const queryKey = [
     '/api/products',
-    filters.categories?.join(',') ?? '',
-    filters.brands?.join(',') ?? '',
-    filters.minPrice ?? '',
-    filters.maxPrice ?? '',
-    filters.sort ?? '',
-    currentPage,
-    PRODUCTS_PER_PAGE
+    {
+      categories: filters.categories,
+      brands: filters.brands,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      sort: filters.sort,
+      page: currentPage,
+      limit: PRODUCTS_PER_PAGE
+    }
   ];
   
   // Query to get products
   const { data: products = [], isLoading, error, refetch } = useQuery<Product[]>({
     queryKey,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,  // similar to keepPreviousData in v4
     staleTime: 60000, // 1 minute
   });
   
