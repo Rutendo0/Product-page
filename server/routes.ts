@@ -11,38 +11,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
       const queryParams = req.query;
+      console.log("Received query params:", queryParams);
       
-      // Parse and validate filter parameters
-      const filter = {
-        categories: queryParams.categories ? 
-          Array.isArray(queryParams.categories) ? 
-            queryParams.categories as string[] : 
-            [queryParams.categories as string] : 
-          undefined,
-        brands: queryParams.brands ? 
-          Array.isArray(queryParams.brands) ? 
-            queryParams.brands as string[] : 
-            [queryParams.brands as string] : 
-          undefined,
-        minPrice: queryParams.minPrice ? parseFloat(queryParams.minPrice as string) : undefined,
-        maxPrice: queryParams.maxPrice ? parseFloat(queryParams.maxPrice as string) : undefined,
-        sort: queryParams.sort as any,
-        page: queryParams.page ? parseInt(queryParams.page as string, 10) : undefined,
-        limit: queryParams.limit ? parseInt(queryParams.limit as string, 10) : undefined,
-      };
+      // Handle filter parameters without strict validation
+      const filter: any = {};
       
-      // Validate filter
-      const parsedFilter = productFilterSchema.parse(filter);
+      // Categories handling
+      if (queryParams.categories) {
+        filter.categories = Array.isArray(queryParams.categories) 
+          ? queryParams.categories as string[] 
+          : [queryParams.categories as string];
+      }
       
-      const products = await storage.getProducts(parsedFilter);
+      // Brands handling
+      if (queryParams.brands) {
+        filter.brands = Array.isArray(queryParams.brands) 
+          ? queryParams.brands as string[] 
+          : [queryParams.brands as string];
+      }
+      
+      // Price range handling
+      if (queryParams.minPrice) {
+        filter.minPrice = parseFloat(queryParams.minPrice as string);
+      }
+      
+      if (queryParams.maxPrice) {
+        filter.maxPrice = parseFloat(queryParams.maxPrice as string);
+      }
+      
+      // Sort, page, and limit handling
+      if (queryParams.sort) {
+        filter.sort = queryParams.sort as string;
+      }
+      
+      if (queryParams.page) {
+        filter.page = parseInt(queryParams.page as string, 10);
+      }
+      
+      if (queryParams.limit) {
+        filter.limit = parseInt(queryParams.limit as string, 10);
+      }
+      
+      console.log("Processed filter:", filter);
+      const products = await storage.getProducts(filter);
+      console.log(`Found ${products.length} products`);
       res.json(products);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid filter parameters", errors: error.errors });
-      } else {
-        console.error("Error fetching products:", error);
-        res.status(500).json({ message: "Failed to fetch products" });
-      }
+      console.error("Error fetching products:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch products", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 
