@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Products from "@/pages/Products";
 import Header from "@/components/layouts/Header";
-import Footer from "@/components/layouts/Footer";
 
 function Router() {
   return (
@@ -22,7 +21,6 @@ function App() {
       <div className="flex-grow">
         <Router />
       </div>
-      <Footer />
       <Toaster />
     </div>
   );
