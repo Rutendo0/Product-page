@@ -77,13 +77,8 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
 
   return (
     <div 
-      ref={tiltRef}
-      style={tiltStyles}
-      className="product-card bg-white rounded-lg shadow overflow-hidden flex flex-col md:flex-row transform-gpu will-change-transform cursor-pointer"
+      className="product-card bg-white rounded-lg shadow hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col md:flex-row cursor-pointer"
       onClick={() => onProductClick(product)}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       <div className="relative md:w-1/4 flex-shrink-0">
         <img 
