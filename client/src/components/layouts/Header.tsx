@@ -8,8 +8,7 @@ const Header = () => {
   const [cartCount, setCartCount] = useState(0);
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Products", path: "/products" },
+    { name: "Products", path: "/" },
   ];
 
   const toggleMobileMenu = () => {
