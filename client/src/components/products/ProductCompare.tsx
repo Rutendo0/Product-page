@@ -11,7 +11,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FaTools, FaCar, FaShippingFast, FaInfoCircle } from "react-icons/fa";
+import { 
+  FaTools, 
+  FaCar, 
+  FaShippingFast, 
+  FaInfoCircle, 
+  FaTachometerAlt, 
+  FaWrench,
+  FaBoxOpen,
+  FaClipboardList
+} from "react-icons/fa";
 import { type Product } from "@shared/schema";
 
 interface ProductCompareProps {
@@ -50,17 +59,70 @@ const ProductCompare: React.FC<ProductCompareProps> = ({
 
   // Get all specs that should be compared
   const getComparisonSpecs = () => {
-    const specs: { label: string; key: string; category: string }[] = [
+    const specs: { label: string; key: string; category: string; renderValue?: (product: Product, value: any) => React.ReactNode }[] = [
       // Basic information
-      { label: "Price", key: "price", category: "Basic" },
-      { label: "Brand", key: "brand", category: "Basic" },
-      { label: "Category", key: "category", category: "Basic" },
+      { label: "Price", key: "price", category: "Basic", 
+        renderValue: (product) => (
+          <span className="font-bold text-primary">${product.price.toFixed(2)}</span>
+        )
+      },
+      { label: "Brand", key: "brand", category: "Basic", 
+        renderValue: (product, value) => (
+          <span className="font-medium">{value || 'Generic'}</span>
+        )
+      },
+      { label: "Category", key: "category", category: "Basic",
+        renderValue: (product, value) => (
+          value ? <Badge variant="outline" className="font-normal">{value}</Badge> : "N/A"
+        )
+      },
+      { label: "Availability", key: "stock", category: "Basic",
+        renderValue: (product) => (
+          product.stock === 0 ? 
+            <span className="text-red-500 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Out of Stock
+            </span> : 
+            <span className="text-green-500 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              In Stock
+            </span>
+        )
+      },
       
       // Technical specs - Using ts-ignore for external API fields
       { label: "OEM Number", key: "OEM", category: "Technical" },
       { label: "Model Compatibility", key: "model", category: "Technical" },
       { label: "Year", key: "year", category: "Technical" },
       { label: "Industry", key: "industry", category: "Technical" },
+      
+      // Performance specs
+      { label: "Material", key: "material", category: "Performance" },
+      { label: "Weight", key: "weight", category: "Performance",
+        renderValue: (product, value) => value ? `${value} kg` : "N/A"
+      },
+      { label: "Dimensions", key: "dimensions", category: "Performance" },
+      { label: "Warranty", key: "warranty", category: "Performance",
+        renderValue: (product, value) => value || "12 months"
+      },
+      
+      // Compatibility
+      { label: "Manufacturer", key: "manufacturer", category: "Compatibility" },
+      { label: "Compatible Makes", key: "compatibleMakes", category: "Compatibility" },
+      { label: "Replaces Part", key: "replacesPart", category: "Compatibility" },
+      
+      // Purchasing info
+      { label: "Return Policy", key: "returnPolicy", category: "Purchasing",
+        renderValue: (product, value) => value || "30 days"
+      },
+      { label: "Shipping Weight", key: "shippingWeight", category: "Purchasing",
+        renderValue: (product, value) => value ? `${value} kg` : "N/A"
+      },
+      { label: "Package Includes", key: "packageIncludes", category: "Purchasing" },
     ];
 
     return specs;
@@ -71,6 +133,7 @@ const ProductCompare: React.FC<ProductCompareProps> = ({
     label: string;
     key: string;
     category: string;
+    renderValue?: (product: Product, value: any) => React.ReactNode;
   }[]>>((acc, spec) => {
     if (!acc[spec.category]) {
       acc[spec.category] = [];
@@ -163,6 +226,9 @@ const ProductCompare: React.FC<ProductCompareProps> = ({
                 <div className="flex items-center gap-2 mb-4">
                   {category === "Basic" && <FaInfoCircle className="text-primary" />}
                   {category === "Technical" && <FaTools className="text-primary" />}
+                  {category === "Performance" && <FaTachometerAlt className="text-primary" />}
+                  {category === "Compatibility" && <FaCar className="text-primary" />}
+                  {category === "Purchasing" && <FaShippingFast className="text-primary" />}
                   <h3 className="font-bold">{category} Information</h3>
                 </div>
 
@@ -177,7 +243,10 @@ const ProductCompare: React.FC<ProductCompareProps> = ({
                       const value = getSpecValue(product, spec.key);
                       return (
                         <div key={`${product.productId}-${spec.key}`} className="text-center px-2">
-                          {value === "N/A" ? (
+                          {/* Use custom render function if provided, otherwise use default rendering */}
+                          {spec.renderValue ? (
+                            spec.renderValue(product, value)
+                          ) : value === "N/A" ? (
                             <span className="text-sm text-muted-foreground">Not available</span>
                           ) : (
                             <span className="text-sm">{value}</span>

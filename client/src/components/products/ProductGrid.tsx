@@ -2,11 +2,20 @@ import { useState } from "react";
 import { type Product } from "@shared/schema";
 import ProductCard from "./ProductCard";
 import ProductListItem from "./ProductListItem";
-import { FaThLarge, FaList } from "react-icons/fa";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FaThLarge, FaList, FaSortAmountDown, FaSortAmountUpAlt, FaClock } from "react-icons/fa";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 // Define sort option type for better type safety
-type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
+type SortOption = 
+  | 'featured' 
+  | 'price-asc' 
+  | 'price-desc' 
+  | 'name-asc' 
+  | 'name-desc'
+  | 'newest'
+  | 'popularity'
+  | 'rating-desc';
 
 interface ProductGridProps {
   products: Product[];
@@ -134,15 +143,78 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   onSortChange(value);
                 }}
               >
-                <SelectTrigger id="sort-products" className="w-[180px] border border-neutral/20 shadow-sm">
-                  <SelectValue placeholder="Featured" />
+                <SelectTrigger 
+                  id="sort-products" 
+                  className="w-[220px] border border-neutral/20 shadow-sm"
+                >
+                  <div className="flex items-center">
+                    {sortOption === 'price-asc' && <FaSortAmountUpAlt className="mr-2 h-4 w-4 text-primary" />}
+                    {sortOption === 'price-desc' && <FaSortAmountDown className="mr-2 h-4 w-4 text-primary" />}
+                    {sortOption === 'newest' && <FaClock className="mr-2 h-4 w-4 text-primary" />}
+                    {sortOption === 'featured' && (
+                      <Badge variant="outline" className="mr-2 py-0 h-5 bg-primary/5 text-primary">
+                        Top
+                      </Badge>
+                    )}
+                    <SelectValue placeholder="Featured" />
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                  <SelectItem value="name-asc">Name: A to Z</SelectItem>
-                  <SelectItem value="name-desc">Name: Z to A</SelectItem>
+                  <SelectGroup>
+                    <SelectLabel>Recommended</SelectLabel>
+                    <SelectItem value="featured">
+                      <div className="flex items-center">
+                        <Badge variant="outline" className="mr-2 py-0 h-5 bg-primary/5 text-primary">
+                          Top
+                        </Badge>
+                        Featured Products
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="popularity">
+                      <div className="flex items-center">
+                        <Badge variant="outline" className="mr-2 py-0 h-5 bg-amber-50 text-amber-600">
+                          Hot
+                        </Badge>
+                        Most Popular
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="rating-desc">
+                      <div className="flex items-center">
+                        <Badge variant="outline" className="mr-2 py-0 h-5 bg-green-50 text-green-600">
+                          ★★★★★
+                        </Badge>
+                        Highest Rated
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="newest">
+                      <div className="flex items-center">
+                        <FaClock className="mr-2 h-4 w-4" />
+                        Newest Arrivals
+                      </div>
+                    </SelectItem>
+                  </SelectGroup>
+                  
+                  <SelectGroup>
+                    <SelectLabel>Price</SelectLabel>
+                    <SelectItem value="price-asc">
+                      <div className="flex items-center">
+                        <FaSortAmountUpAlt className="mr-2 h-4 w-4" />
+                        Price: Low to High
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="price-desc">
+                      <div className="flex items-center">
+                        <FaSortAmountDown className="mr-2 h-4 w-4" />
+                        Price: High to Low
+                      </div>
+                    </SelectItem>
+                  </SelectGroup>
+                  
+                  <SelectGroup>
+                    <SelectLabel>Alphabetical</SelectLabel>
+                    <SelectItem value="name-asc">Name: A to Z</SelectItem>
+                    <SelectItem value="name-desc">Name: Z to A</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
