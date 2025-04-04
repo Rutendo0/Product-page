@@ -1,7 +1,6 @@
 import { type Product } from "@shared/schema";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useTiltEffect } from "@/hooks/use-tilt-effect";
 import { FaShoppingCart, FaHeart, FaStar, FaStarHalfAlt, FaExchangeAlt } from "react-icons/fa";
 import "./ProductShineEffect.css";
 
@@ -20,20 +19,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
-  
-  // Use our custom tilt effect hook with some configuration options
-  const { 
-    tiltRef, 
-    tiltStyles, 
-    handleMouseMove, 
-    handleMouseEnter, 
-    handleMouseLeave 
-  } = useTiltEffect({
-    max: 10,           // Maximum tilt rotation (degrees)
-    perspective: 1000, // Perspective value for 3D effect
-    scale: 1.03,       // Scale factor on hover (subtle)
-    speed: 300,        // Transition speed in ms
-  });
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -92,13 +77,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div 
-      ref={tiltRef}
-      style={tiltStyles}
-      className="product-card bg-white rounded-lg overflow-hidden transform-gpu cursor-pointer group border border-transparent hover:border-primary/20 will-change-transform"
+      className="product-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border border-transparent hover:border-primary/20"
       onClick={() => onProductClick(product)}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       <div className="relative overflow-hidden">
         <img 

@@ -2,7 +2,6 @@ import { type Product } from "@shared/schema";
 import { useState } from "react";
 import { FaShoppingCart, FaHeart, FaStar, FaStarHalfAlt, FaExchangeAlt } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
-import { useTiltEffect } from "@/hooks/use-tilt-effect";
 import "./ProductShineEffect.css";
 
 interface ProductListItemProps {
@@ -20,20 +19,6 @@ const ProductListItem: React.FC<ProductListItemProps> = ({
 }) => {
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
-  
-  // Use our custom tilt effect hook with some configuration options
-  const { 
-    tiltRef, 
-    tiltStyles, 
-    handleMouseMove, 
-    handleMouseEnter, 
-    handleMouseLeave 
-  } = useTiltEffect({
-    max: 5,             // Less tilt for list items
-    perspective: 1500,  // More subtle perspective
-    scale: 1.02,        // Slightly less scale for list items
-    speed: 400,         // Transition speed in ms
-  });
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
