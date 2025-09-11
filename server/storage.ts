@@ -2,7 +2,7 @@ import {
   users, type User, type InsertUser, 
   type Product, type InsertProduct, type ProductFilter, 
   type ExternalProduct, externalProductSchema
-} from "@shared/schema";
+} from "../shared/schema";
 import { z } from "zod";
 
 // modify the interface with any CRUD methods

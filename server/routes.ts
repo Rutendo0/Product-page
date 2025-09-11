@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { productFilterSchema } from "@shared/schema";
+import { productFilterSchema } from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
