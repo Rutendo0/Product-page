@@ -1,6 +1,6 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { registerRoutes } from "../server/routes";
-import { log } from "../server/vite";
+import { log } from "../server/logger";
 
 let appPromise: Promise<Express> | null = null;
 
