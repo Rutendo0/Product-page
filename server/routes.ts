@@ -1,67 +1,41 @@
 import type { Express, Request, Response } from "express";
-import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { z } from "zod";
-import { productFilterSchema } from "../shared/schema";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // API Routes
-  
+export async function registerRoutes(app: Express): Promise<void> {
+  // Health check
+  app.get("/api/health", (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
   // Get all products with optional filtering
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
       const queryParams = req.query;
-      console.log("Received query params:", queryParams);
-      
-      // Handle filter parameters without strict validation
       const filter: any = {};
-      
-      // Categories handling
+
       if (queryParams.categories) {
-        filter.categories = Array.isArray(queryParams.categories) 
-          ? queryParams.categories as string[] 
+        filter.categories = Array.isArray(queryParams.categories)
+          ? (queryParams.categories as string[])
           : [queryParams.categories as string];
       }
-      
-      // Brands handling
+
       if (queryParams.brands) {
-        filter.brands = Array.isArray(queryParams.brands) 
-          ? queryParams.brands as string[] 
+        filter.brands = Array.isArray(queryParams.brands)
+          ? (queryParams.brands as string[])
           : [queryParams.brands as string];
       }
-      
-      // Price range handling
-      if (queryParams.minPrice) {
-        filter.minPrice = parseFloat(queryParams.minPrice as string);
-      }
-      
-      if (queryParams.maxPrice) {
-        filter.maxPrice = parseFloat(queryParams.maxPrice as string);
-      }
-      
-      // Sort, page, and limit handling
-      if (queryParams.sort) {
-        filter.sort = queryParams.sort as string;
-      }
-      
-      if (queryParams.page) {
-        filter.page = parseInt(queryParams.page as string, 10);
-      }
-      
-      if (queryParams.limit) {
-        filter.limit = parseInt(queryParams.limit as string, 10);
-      }
-      
-      console.log("Processed filter:", filter);
+
+      if (queryParams.minPrice) filter.minPrice = parseFloat(queryParams.minPrice as string);
+      if (queryParams.maxPrice) filter.maxPrice = parseFloat(queryParams.maxPrice as string);
+      if (queryParams.sort) filter.sort = queryParams.sort as string;
+      if (queryParams.page) filter.page = parseInt(queryParams.page as string, 10);
+      if (queryParams.limit) filter.limit = parseInt(queryParams.limit as string, 10);
+
       const products = await storage.getProducts(filter);
-      console.log(`Found ${products.length} products`);
       res.json(products);
     } catch (error) {
       console.error("Error fetching products:", error);
-      res.status(500).json({ 
-        message: "Failed to fetch products", 
-        error: error instanceof Error ? error.message : String(error) 
-      });
+      res.status(500).json({ message: "Failed to fetch products" });
     }
   });
 
@@ -70,11 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const productId = req.params.id;
       const product = await storage.getProduct(productId);
-      
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-      
+      if (!product) return res.status(404).json({ message: "Product not found" });
       res.json(product);
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -114,8 +84,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch price range" });
     }
   });
-
-  const httpServer = createServer(app);
-
-  return httpServer;
 }

@@ -1,4 +1,5 @@
-import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import express from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { registerRoutes } from "../server/routes";
 import { log } from "../server/logger";
 
@@ -13,8 +14,8 @@ async function createApp(): Promise<Express> {
     const start = Date.now();
     res.on("finish", () => {
       const duration = Date.now() - start;
-      if (req.path.startsWith("/api")) {
-        log(`${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
+      if (req.url.startsWith("/api")) {
+        log(`${req.method} ${req.url} ${res.statusCode} in ${duration}ms`);
       }
     });
     next();
@@ -24,8 +25,15 @@ async function createApp(): Promise<Express> {
   return app;
 }
 
-export default async function handler(req: Request, res: Response) {
-  if (!appPromise) appPromise = createApp();
-  const app = await appPromise;
-  return (app as unknown as (req: Request, res: Response) => void)(req, res);
+export default async function handler(req: any, res: any) {
+  try {
+    if (!appPromise) appPromise = createApp();
+    const app = await appPromise;
+    return (app as unknown as (req: any, res: any) => void)(req, res);
+  } catch (err: any) {
+    console.error("API handler error:", err?.stack || err);
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ message: "Internal Server Error" }));
+  }
 }

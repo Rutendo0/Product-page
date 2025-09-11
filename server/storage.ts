@@ -1,24 +1,51 @@
-import { 
-  users, type User, type InsertUser, 
-  type Product, type InsertProduct, type ProductFilter, 
-  type ExternalProduct, externalProductSchema
-} from "../shared/schema";
 import { z } from "zod";
 
-// modify the interface with any CRUD methods
-// you might need
+// Lightweight runtime-only types to avoid pulling in shared schema on Vercel
+export type User = { id: number; username: string; password: string };
+export type InsertUser = { username: string; password: string };
 
+export type Product = {
+  id: number;
+  productId: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  category?: string;
+  brand?: string;
+  stock?: number;
+  sku?: string;
+  createdAt: Date;
+  // Optional external fields
+  OEM?: string;
+  model?: string;
+  year?: number;
+  industry?: string;
+  images?: { url: string }[];
+};
+
+export type ProductFilter = {
+  categories?: string[];
+  brands?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
+  page?: number;
+  limit?: number;
+};
+
+// modify the interface with any CRUD methods you might need
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
   // Product methods
   getProducts(filter?: ProductFilter): Promise<Product[]>;
   getProduct(id: string): Promise<Product | undefined>;
   getProductCategories(): Promise<string[]>;
   getProductBrands(): Promise<string[]>;
-  getMinMaxPrices(): Promise<{min: number, max: number}>;
+  getMinMaxPrices(): Promise<{ min: number; max: number }>;
 }
 
 export class MemStorage implements IStorage {
