@@ -10,6 +10,8 @@ import { FaSearch, FaShoppingCart, FaExchangeAlt } from "react-icons/fa";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/context/CartContext";
+import { Link } from "wouter";
 
 // Import the SortOption type from ProductGrid
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
@@ -19,9 +21,9 @@ const PRODUCTS_PER_PAGE = 9;
 const Products = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { addToCart, count: cartCount } = useCart();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<{product: Product, quantity: number}[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<ProductFilter>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,8 +37,7 @@ const Products = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   
-  // Calculate cart count and compare count
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  // Calculate compare count
   const compareCount = compareProducts.length;
   
   // Generate query key based on filters and pagination
@@ -129,22 +130,7 @@ const Products = () => {
   };
   
   const handleAddToCart = (product: Product, quantity: number = 1) => {
-    setCartItems(prev => {
-      // Check if product already exists in cart
-      const existingItem = prev.find(item => item.product.productId === product.productId);
-      
-      if (existingItem) {
-        // Update quantity if product already exists
-        return prev.map(item => 
-          item.product.productId === product.productId 
-            ? { ...item, quantity: item.quantity + quantity } 
-            : item
-        );
-      } else {
-        // Add new product if it doesn't exist
-        return [...prev, { product, quantity }];
-      }
-    });
+    addToCart(product, quantity);
   };
   
   const handleFilterChange = useCallback((newFilters: Partial<ProductFilter>) => {
@@ -261,12 +247,12 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-neutral-light">
       {/* Page title section with gradient background */}
-      <section className="bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-white py-12 shadow-lg">
+      <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white py-12 shadow-lg">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
             <div className="max-w-2xl">
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Auto Parts Marketplace</h1>
-              <p className="mt-3 text-lg text-white/90 max-w-xl">Premium quality automotive parts for all makes and models. Find exactly what you need.</p>
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Car Parts Marketplace</h1>
+              <p className="mt-3 text-lg text-white/90 max-w-xl">Shop OEM and aftermarket car parts by make, model, and year. Compare prices and suppliers to get the best deal.</p>
             </div>
             
             <div className="flex items-center gap-4 mt-4 md:mt-0">
@@ -284,14 +270,14 @@ const Products = () => {
               </button>
               
               {/* Shopping cart button with counter and animation */}
-              <button className="relative bg-white hover:bg-white/90 text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
+              <Link href="/cart" className="relative bg-white hover:bg-white/90 text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
                 <FaShoppingCart size={22} />
                 {cartCount > 0 && (
                   <Badge className="absolute -top-2 -right-2 bg-rose-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
                     {cartCount}
                   </Badge>
                 )}
-              </button>
+              </Link>
             </div>
           </div>
           

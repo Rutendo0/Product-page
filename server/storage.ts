@@ -28,12 +28,31 @@ export type Product = {
 export type ProductFilter = {
   categories?: string[];
   brands?: string[];
+  suppliers?: string[];
   minPrice?: number;
   maxPrice?: number;
+  compatibility?: { make?: string; model?: string; year?: string };
   sort?: 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
   page?: number;
   limit?: number;
 };
+
+// Order types
+export type OrderItem = { productId: string; name: string; price: number; quantity: number };
+export type Order = {
+  id: string;
+  items: OrderItem[];
+  subtotal: number;
+  paymentMethod: 'card' | 'mobile' | 'cash';
+  deliver: boolean;
+  location?: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  notes?: string;
+  createdAt: Date;
+};
+export type InsertOrder = Omit<Order, 'id' | 'createdAt'>;
 
 // modify the interface with any CRUD methods you might need
 export interface IStorage {
@@ -46,11 +65,18 @@ export interface IStorage {
   getProductCategories(): Promise<string[]>;
   getProductBrands(): Promise<string[]>;
   getMinMaxPrices(): Promise<{ min: number; max: number }>;
+  // Order methods
+  createOrder(order: InsertOrder): Promise<Order>;
+  listOrders(): Promise<Order[]>;
 }
+
+import { db } from './db';
+import { orders as ordersTable, orderItems as orderItemsTable } from '@shared/schema';
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private products: Map<string, Product>;
+  private orders: Map<string, Order>;
   private externalApiUrl: string;
 
   currentId: number;
@@ -58,6 +84,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.products = new Map();
+    this.orders = new Map();
     this.currentId = 1;
     this.externalApiUrl = 'https://c-ag.vercel.app/api/products';
   }
@@ -119,7 +146,7 @@ export class MemStorage implements IStorage {
             stock: Math.floor(Math.random() * 50) + 1, // Random stock
             sku: item.sku || `SKU-${Math.floor(Math.random() * 10000)}`,
             createdAt: new Date(),
-          };
+          } as Product & { make?: string; supplier?: string };
           
           // Add custom properties from external API for frontend use
           // We'll store these properties but they won't be in our schema
@@ -249,6 +276,46 @@ export class MemStorage implements IStorage {
     });
     
     return { min, max };
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const id = `ord_${Date.now()}_${Math.floor(Math.random()*1000)}`;
+    const createdAt = new Date();
+
+    // Persist to Postgres
+    await db.insert(ordersTable).values({
+      id,
+      subtotal: order.subtotal,
+      paymentMethod: order.paymentMethod,
+      deliver: order.deliver,
+      location: order.location,
+      fullName: order.fullName,
+      phone: order.phone,
+      email: order.email,
+      notes: order.notes,
+      createdAt,
+    });
+
+    if (order.items?.length) {
+      await db.insert(orderItemsTable).values(
+        order.items.map((it) => ({
+          orderId: id,
+          productId: it.productId,
+          name: it.name,
+          price: it.price,
+          quantity: it.quantity,
+        }))
+      );
+    }
+
+    const created: Order = { id, createdAt, ...order };
+    this.orders.set(id, created); // Also keep in-memory cache for quick GET
+    return created;
+  }
+
+  async listOrders(): Promise<Order[]> {
+    // Return from cache for now; could join from DB if needed
+    return Array.from(this.orders.values()).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 }
 

@@ -38,9 +38,11 @@ export const productSchema = createInsertSchema(products);
 export type Product = typeof products.$inferSelect & {
   // Optional additional fields from external API
   OEM?: string;
+  make?: string;
   model?: string;
   year?: number;
   industry?: string;
+  supplier?: string;
   // These will be used for images array from external API
   images?: { url: string }[];
 };
@@ -51,14 +53,47 @@ export type InsertProduct = typeof products.$inferInsert;
 export const productFilterSchema = z.object({
   categories: z.array(z.string()).optional(),
   brands: z.array(z.string()).optional(),
+  suppliers: z.array(z.string()).optional(),
   minPrice: z.number().min(0).optional(),
   maxPrice: z.number().optional(),
+  compatibility: z
+    .object({ make: z.string().optional(), model: z.string().optional(), year: z.string().optional() })
+    .partial()
+    .optional(),
   sort: z.enum(['featured', 'price-asc', 'price-desc', 'name-asc', 'name-desc']).optional(),
   page: z.number().min(1).optional(),
   limit: z.number().min(1).optional(),
 });
 
 export type ProductFilter = z.infer<typeof productFilterSchema>;
+
+// Orders schema (PostgreSQL)
+export const orders = pgTable("orders", {
+  id: text("id").primaryKey(),
+  subtotal: doublePrecision("subtotal").notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  deliver: boolean("deliver").notNull(),
+  location: text("location"),
+  fullName: text("full_name").notNull(),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: text("order_id").notNull().references(() => orders.id),
+  productId: text("product_id").notNull(),
+  name: text("name").notNull(),
+  price: doublePrecision("price").notNull(),
+  quantity: integer("quantity").notNull(),
+});
+
+export type OrderRow = typeof orders.$inferSelect;
+export type InsertOrderRow = typeof orders.$inferInsert;
+export type OrderItemRow = typeof orderItems.$inferSelect;
+export type InsertOrderItemRow = typeof orderItems.$inferInsert;
 
 // External API product schema
 export const externalProductSchema = z.object({

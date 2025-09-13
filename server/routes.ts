@@ -31,6 +31,22 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (queryParams.page) filter.page = parseInt(queryParams.page as string, 10);
       if (queryParams.limit) filter.limit = parseInt(queryParams.limit as string, 10);
 
+      // Optional: compatibility filters
+      if (queryParams.make || queryParams.model || queryParams.year) {
+        (filter as any).compatibility = {
+          make: queryParams.make as string | undefined,
+          model: queryParams.model as string | undefined,
+          year: queryParams.year as string | undefined,
+        };
+      }
+
+      // Supplier filters
+      if (queryParams.suppliers) {
+        (filter as any).suppliers = Array.isArray(queryParams.suppliers)
+          ? (queryParams.suppliers as string[])
+          : [queryParams.suppliers as string];
+      }
+
       const products = await storage.getProducts(filter);
       res.json(products);
     } catch (error) {
@@ -82,6 +98,51 @@ export async function registerRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Error fetching price range:", error);
       res.status(500).json({ message: "Failed to fetch price range" });
+    }
+  });
+
+  // Create order
+  app.post("/api/orders", async (req: Request, res: Response) => {
+    try {
+      const body = req.body;
+      // Basic validation
+      if (!body || !Array.isArray(body.items) || body.items.length === 0) {
+        return res.status(400).json({ message: "Items are required" });
+      }
+      if (!body.fullName || !body.phone || !body.email) {
+        return res.status(400).json({ message: "Full name, phone and email are required" });
+      }
+      if (body.deliver && !body.location) {
+        return res.status(400).json({ message: "Delivery location is required when deliver=true" });
+      }
+
+      const created = await storage.createOrder({
+        items: body.items,
+        subtotal: body.subtotal,
+        paymentMethod: body.paymentMethod,
+        deliver: body.deliver,
+        location: body.location,
+        fullName: body.fullName,
+        phone: body.phone,
+        email: body.email,
+        notes: body.notes,
+      });
+
+      res.status(201).json(created);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  // List orders (debug)
+  app.get("/api/orders", async (_req: Request, res: Response) => {
+    try {
+      const orders = await storage.listOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error("Error listing orders:", error);
+      res.status(500).json({ message: "Failed to list orders" });
     }
   });
 }

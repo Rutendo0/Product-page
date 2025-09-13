@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Products from "@/pages/Products";
+import Cart from "@/pages/Cart";
 import Header from "@/components/layouts/Header";
 
 function Router() {
@@ -9,6 +10,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Products}/>
       <Route path="/products" component={Products}/>
+      <Route path="/cart" component={Cart}/>
       <Route component={NotFound} />
     </Switch>
   );
