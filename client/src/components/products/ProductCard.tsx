@@ -123,8 +123,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
         )}
       </div>
       <div className="p-4">
-        <div className="mb-1 text-sm font-medium text-neutral-600">{product.category || 'General'}</div>
-        <h3 className="font-semibold text-lg mb-2 group-hover:text-neutral-800 transition-colors line-clamp-1">{product.name}</h3>
+        <div className="mb-1 text-sm font-medium text-gray-700">{product.category || 'General'}</div>
+        <h3 className="font-semibold text-lg mb-2 text-gray-900 group-hover:text-black transition-colors line-clamp-1">{product.name}</h3>
         <div className="flex items-center mb-2">
           <div className="flex text-amber-400 text-sm">
             <FaStar />
@@ -133,19 +133,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <FaStar />
             <FaStarHalfAlt />
           </div>
-          <span className="ml-1 text-xs text-neutral-dark">({Math.floor(Math.random() * 50) + 5})</span>
+          <span className="ml-1 text-xs text-gray-600">({Math.floor(Math.random() * 50) + 5})</span>
         </div>
         {/* Show brand if available, otherwise description */}
         {product.brand ? (
-          <p className="text-neutral-dark text-sm mb-3">Brand: <span className="font-medium">{product.brand}</span></p>
+          <p className="text-gray-700 text-sm mb-3">Brand: <span className="font-medium text-gray-900">{product.brand}</span></p>
         ) : (
-          <p className="text-neutral-dark text-sm line-clamp-2 mb-3">{product.description || "No description available"}</p>
+          <p className="text-gray-700 text-sm line-clamp-2 mb-3">{product.description || "No description available"}</p>
         )}
         <div className="pt-2 border-t flex justify-between items-center">
           <div>
-            <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
+            <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
             {product.originalPrice && (
-              <span className="text-sm line-through text-neutral-dark ml-1">
+              <span className="text-sm line-through text-gray-500 ml-1">
                 ${product.originalPrice.toFixed(2)}
               </span>
             )}
