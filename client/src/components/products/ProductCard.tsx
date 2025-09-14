@@ -77,7 +77,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div 
-      className="product-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border border-transparent hover:border-primary/20"
+      className="product-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border border-transparent hover:border-neutral-200"
       onClick={() => onProductClick(product)}
     >
       <div className="relative overflow-hidden">
@@ -100,7 +100,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <FaHeart className={isFavorite ? "text-rose-500" : ""} />
           </button>
           <button 
-            className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-primary transition-colors"
+            className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-neutral-800 transition-colors"
             onClick={handleAddToCart}
             aria-label="Add to cart"
           >
@@ -123,8 +123,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
         )}
       </div>
       <div className="p-4">
-        <div className="mb-1 text-sm font-medium text-primary/70">{product.category || 'General'}</div>
-        <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+        <div className="mb-1 text-sm font-medium text-neutral-600">{product.category || 'General'}</div>
+        <h3 className="font-semibold text-lg mb-2 group-hover:text-neutral-800 transition-colors line-clamp-1">{product.name}</h3>
         <div className="flex items-center mb-2">
           <div className="flex text-amber-400 text-sm">
             <FaStar />
