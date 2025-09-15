@@ -51,25 +51,25 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   const renderSkeleton = () => {
     return Array(6).fill(0).map((_, i) => (
-      <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse border border-neutral/10">
-        <div className="h-52 bg-neutral-100 flex items-center justify-center">
+      <div key={i} className="bg-card rounded-lg shadow-md overflow-hidden animate-pulse border border-border">
+        <div className="h-52 bg-muted flex items-center justify-center">
           <svg className="w-16 h-16 text-neutral-200" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd"></path>
           </svg>
         </div>
         <div className="p-4 space-y-3">
-          <div className="h-4 bg-neutral-100 rounded-full w-3/4"></div>
-          <div className="h-6 bg-neutral-100 rounded-full w-1/2"></div>
+          <div className="h-4 bg-muted rounded-full w-3/4"></div>
+          <div className="h-6 bg-muted rounded-full w-1/2"></div>
           <div className="flex space-x-1 mt-1">
             {[1, 2, 3, 4, 5].map(n => (
-              <div key={n} className="w-4 h-4 bg-neutral-100 rounded-full"></div>
+              <div key={n} className="w-4 h-4 bg-muted rounded-full"></div>
             ))}
           </div>
-          <div className="h-4 bg-neutral-100 rounded-full w-full"></div>
-          <div className="h-4 bg-neutral-100 rounded-full w-full"></div>
-          <div className="flex justify-between items-center pt-2 border-t border-neutral-50">
-            <div className="h-8 bg-neutral-100 rounded-full w-1/3"></div>
-            <div className="h-8 bg-neutral-100 rounded-full w-8"></div>
+          <div className="h-4 bg-muted rounded-full w-full"></div>
+          <div className="h-4 bg-muted rounded-full w-full"></div>
+          <div className="flex justify-between items-center pt-2 border-t border-border">
+            <div className="h-8 bg-muted rounded-full w-1/3"></div>
+            <div className="h-8 bg-muted rounded-full w-8"></div>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white border-l-4 border-red-500 rounded-xl shadow-md p-6 mb-6" role="alert">
+      <div className="bg-card border-l-4 border-red-500 rounded-xl shadow-md p-6 mb-6" role="alert">
         <div className="flex items-center">
           <div className="flex-shrink-0 mr-4">
             <svg className="h-12 w-12 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,7 +114,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   return (
     <div>
       {/* Sorting and display options */}
-      <div className="bg-white rounded-xl shadow-md p-5 mb-6 border border-neutral/10">
+      <div className="bg-card rounded-xl shadow-md p-5 mb-6 border border-border">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex-1">
             <div className="flex items-center">
@@ -218,11 +218,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex bg-neutral-100 p-1 rounded-lg border border-neutral-200">
+            <div className="flex bg-muted p-1 rounded-lg border border-border">
               <button 
                 className={`p-2 rounded transition-all ${viewMode === 'grid' 
-                  ? 'bg-white text-primary shadow-sm' 
-                  : 'text-neutral-500 hover:text-primary'}`}
+                  ? 'bg-card text-primary shadow-sm' 
+                  : 'text-muted-foreground hover:text-primary'}` }
                 onClick={() => handleViewChange('grid')}
                 aria-label="Grid view"
                 title="Grid view"
@@ -231,8 +231,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               </button>
               <button 
                 className={`p-2 rounded transition-all ${viewMode === 'list' 
-                  ? 'bg-white text-primary shadow-sm' 
-                  : 'text-neutral-500 hover:text-primary'}`}
+                  ? 'bg-card text-primary shadow-sm' 
+                  : 'text-muted-foreground hover:text-primary'}` }
                 onClick={() => handleViewChange('list')}
                 aria-label="List view"
                 title="List view"
@@ -253,11 +253,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
       {/* No results state - improved with better visual design */}
       {!isLoading && products.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-xl shadow-md border border-neutral/5 overflow-hidden">
+        <div className="text-center py-16 bg-card rounded-xl shadow-md border border-border overflow-hidden">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"></div>
             <div className="relative z-10 flex flex-col items-center">
-              <div className="mb-5 p-6 bg-white rounded-full shadow-sm border border-neutral-100">
+              <div className="mb-5 p-6 bg-card rounded-full shadow-sm border border-border">
                 <svg className="w-16 h-16 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
@@ -276,7 +276,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 </button>
                 <button 
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 font-medium py-3 px-6 rounded-lg shadow-sm"
+                  className="bg-card border border-border text-muted-foreground hover:bg-accent font-medium py-3 px-6 rounded-lg shadow-sm"
                 >
                   Try Different Search
                 </button>

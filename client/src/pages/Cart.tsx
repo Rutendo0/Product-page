@@ -118,7 +118,7 @@ const Cart = () => {
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-20 h-20 object-contain bg-neutral-50 rounded border"
+                  className="w-20 h-20 object-contain bg-muted rounded border"
                 />
                 <div className="flex-1">
                   <p className="font-medium line-clamp-1">{product.name}</p>
@@ -265,7 +265,7 @@ const Cart = () => {
                     Confirm Order
                   </button>
                   <button
-                    className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-medium py-3 rounded-lg"
+                    className="flex-1 bg-muted hover:bg-muted/80 text-foreground font-medium py-3 rounded-lg"
                     onClick={() => setCheckoutOpen(false)}
                   >
                     Cancel
@@ -275,7 +275,7 @@ const Cart = () => {
             )}
 
             <button
-              className="w-full mt-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-medium py-3 rounded-lg"
+              className="w-full mt-3 bg-muted hover:bg-muted/80 text-foreground font-medium py-3 rounded-lg"
               onClick={clearCart}
             >
               Clear Cart

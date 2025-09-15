@@ -130,10 +130,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
         
         <div className="flex flex-col lg:flex-row">
           {/* Image section with gallery */}
-          <div className="lg:w-1/2 p-6 bg-neutral-50">
+          <div className="lg:w-1/2 p-6 bg-muted">
             <div className="relative">
               {/* Main product image */}
-              <div className="w-full h-[300px] md:h-[350px] bg-white rounded-lg mb-4 flex items-center justify-center overflow-hidden relative">
+              <div className="w-full h-[300px] md:h-[350px] bg-card rounded-lg mb-4 flex items-center justify-center overflow-hidden relative">
                 {productImages.length > 1 && (
                   <>
                     <button 

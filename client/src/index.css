@@ -3,6 +3,57 @@
 @tailwind utilities;
 
 @layer base {
+  /* Dark theme tokens: deep green, near-black backgrounds, minimal white */
+  :root {
+    /* Core surfaces */
+    --background: 210 20% 6%;           /* near-black */
+    --foreground: 0 0% 96%;             /* off-white for good contrast */
+
+    /* Cards and popovers */
+    --card: 210 20% 8%;                 /* very dark slate */
+    --card-foreground: 0 0% 96%;
+    --popover: 210 20% 8%;
+    --popover-foreground: 0 0% 96%;
+
+    /* Brand colors (dark green focus) */
+    --primary: 150 60% 28%;             /* dark green */
+    --primary-foreground: 0 0% 98%;     /* white text on primary */
+    --secondary: 150 25% 15%;           /* deeper green for secondary */
+    --secondary-foreground: 0 0% 96%;
+
+    /* Subtle surfaces */
+    --muted: 150 10% 18%;
+    --muted-foreground: 0 0% 78%;
+    --accent: 150 35% 22%;
+    --accent-foreground: 0 0% 96%;
+
+    /* Status */
+    --destructive: 0 72% 40%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Controls and outlines */
+    --border: 150 10% 26%;
+    --input: 150 10% 26%;
+    --ring: 150 60% 40%;
+
+    /* Charts (kept in green hues) */
+    --chart-1: 150 60% 35%;
+    --chart-2: 155 45% 32%;
+    --chart-3: 145 50% 28%;
+    --chart-4: 160 35% 26%;
+    --chart-5: 140 40% 30%;
+
+    /* Sidebar */
+    --sidebar-background: 210 20% 6%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-primary: 150 60% 28%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 150 25% 14%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 150 10% 24%;
+    --sidebar-ring: 150 60% 40%;
+  }
+
   * {
     @apply border-border;
   }

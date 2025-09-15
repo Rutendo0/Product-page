@@ -45,7 +45,7 @@ const ProductPagination: React.FC<PaginationProps> = ({
       items.push(
         <button
           key="page-1"
-          className="px-4 py-2 border-t border-b border-neutral bg-white text-neutral-dark hover:bg-neutral transition-colors"
+          className="px-4 py-2 border-t border-b border-border bg-card text-foreground hover:bg-accent transition-colors"
           onClick={() => onPageChange(1)}
         >
           1
@@ -57,7 +57,7 @@ const ProductPagination: React.FC<PaginationProps> = ({
         items.push(
           <span
             key="ellipsis-1"
-            className="px-4 py-2 border-t border-b border-neutral bg-white text-neutral-dark"
+            className="px-4 py-2 border-t border-b border-border bg-card text-muted-foreground"
           >
             ...
           </span>
@@ -70,8 +70,8 @@ const ProductPagination: React.FC<PaginationProps> = ({
       items.push(
         <button
           key={`page-${i}`}
-          className={`px-4 py-2 border-t border-b border-neutral hover:bg-neutral transition-colors ${
-            currentPage === i ? 'bg-primary text-white' : 'bg-white text-neutral-dark'
+          className={`px-4 py-2 border-t border-b border-border hover:bg-accent transition-colors ${
+            currentPage === i ? 'bg-primary text-primary-foreground' : 'bg-card text-foreground'
           }`}
           onClick={() => onPageChange(i)}
         >
@@ -87,7 +87,7 @@ const ProductPagination: React.FC<PaginationProps> = ({
         items.push(
           <span
             key="ellipsis-2"
-            className="px-4 py-2 border-t border-b border-neutral bg-white text-neutral-dark"
+            className="px-4 py-2 border-t border-b border-border bg-card text-muted-foreground"
           >
             ...
           </span>
@@ -97,7 +97,7 @@ const ProductPagination: React.FC<PaginationProps> = ({
       items.push(
         <button
           key={`page-${totalPages}`}
-          className="px-4 py-2 border-t border-b border-neutral bg-white text-neutral-dark hover:bg-neutral transition-colors"
+          className="px-4 py-2 border-t border-b border-border bg-card text-foreground hover:bg-accent transition-colors"
           onClick={() => onPageChange(totalPages)}
         >
           {totalPages}
@@ -114,7 +114,7 @@ const ProductPagination: React.FC<PaginationProps> = ({
         <button
           onClick={handlePrevPage}
           disabled={currentPage === 1}
-          className="px-3 py-2 rounded-l-md border border-neutral bg-white text-neutral-dark hover:bg-neutral disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 rounded-l-md border border-border bg-card text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaChevronLeft />
         </button>
@@ -126,7 +126,7 @@ const ProductPagination: React.FC<PaginationProps> = ({
         <button
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded-r-md border border-neutral bg-white text-neutral-dark hover:bg-neutral disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 rounded-r-md border border-border bg-card text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaChevronRight />
         </button>

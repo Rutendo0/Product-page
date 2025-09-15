@@ -245,7 +245,7 @@ const Products = () => {
   };
   
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-green-950/95">
       {/* Page title section with gradient background */}
       <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white py-12 shadow-lg">
         <div className="container mx-auto px-4">
@@ -259,7 +259,7 @@ const Products = () => {
               {/* Compare button with counter and animation */}
               <button 
                 onClick={openCompareModal}
-                className="relative bg-white hover:bg-white/90 text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105"
+                className="relative bg-card hover:bg-accent text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105"
               >
                 <FaExchangeAlt size={20} />
                 {compareCount > 0 && (
@@ -270,7 +270,7 @@ const Products = () => {
               </button>
               
               {/* Shopping cart button with counter and animation */}
-              <Link href="/cart" className="relative bg-white hover:bg-white/90 text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
+              <Link href="/cart" className="relative bg-card hover:bg-accent text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
                 <FaShoppingCart size={22} />
                 {cartCount > 0 && (
                   <Badge className="absolute -top-2 -right-2 bg-rose-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
@@ -293,13 +293,13 @@ const Products = () => {
               />
               <button 
                 onClick={handleResetFilters}
-                className="bg-white text-primary font-medium px-6 py-4 hover:bg-primary/10 transition-colors"
+                className="bg-card text-primary font-medium px-6 py-4 hover:bg-accent transition-colors"
               >
                 Clear
               </button>
               <button 
                 onClick={() => console.log("Search triggered")}
-                className="bg-white text-primary font-medium px-6 py-4 rounded-r-lg hover:bg-primary/10 transition-colors"
+                className="bg-card text-primary font-medium px-6 py-4 rounded-r-lg hover:bg-accent transition-colors"
               >
                 Search
               </button>
@@ -311,10 +311,10 @@ const Products = () => {
           
           {/* Popular categories */}
           <div className="flex flex-wrap mt-6 gap-2 justify-center">
-            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Original Equipment</span>
-            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Aftermarket</span>
-            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Performance Parts</span>
-            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 cursor-pointer transition-colors">Special Offers</span>
+            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Original Equipment</span>
+            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Aftermarket</span>
+            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Performance Parts</span>
+            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Special Offers</span>
           </div>
         </div>
       </section>
@@ -325,7 +325,7 @@ const Products = () => {
         <div className="lg:hidden mb-6">
           <button
             onClick={toggleMobileFilters}
-            className="w-full bg-white text-primary font-semibold py-4 px-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral/10 flex justify-between items-center"
+            className="w-full bg-card text-primary font-semibold py-4 px-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-border flex justify-between items-center"
           >
             <span className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -354,9 +354,9 @@ const Products = () => {
           <div className="lg:w-3/4">
             {/* Results count and alert message - improved styling */}
             {!isLoading && (
-              <div className="bg-white rounded-xl shadow-md p-5 mb-6 border border-neutral/10">
+              <div className="bg-card rounded-xl shadow-md p-5 mb-6 border border-border">
                 <div className="flex flex-wrap justify-between items-center">
-                  <p className="text-neutral-dark">
+                  <p className="text-muted-foreground">
                     Showing <span className="font-semibold text-primary">{filteredProducts.length}</span> of <span className="font-semibold text-primary">{totalFilteredProducts}</span> products
                   </p>
                   
@@ -377,7 +377,7 @@ const Products = () => {
                 </div>
                 
                 {searchQuery && (
-                  <div className="mt-3 text-sm bg-blue-50 text-blue-800 p-3 rounded-lg border border-blue-100">
+                  <div className="mt-3 text-sm bg-accent text-foreground p-3 rounded-lg border border-border">
                     <span className="font-medium">Search results for:</span> <span className="font-semibold">"{searchQuery}"</span>
                   </div>
                 )}

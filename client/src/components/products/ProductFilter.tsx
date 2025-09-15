@@ -169,7 +169,7 @@ const ProductFilter: React.FC<FilterProps> = ({ onFilterChange, onResetFilters }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-5 sticky top-4 border border-neutral/10">
+    <div className="bg-card rounded-xl shadow-md p-5 sticky top-4 border border-border">
       {/* Header with count badge */}
       <div className="flex items-center justify-between mb-6 pb-3 border-b">
         <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -178,7 +178,7 @@ const ProductFilter: React.FC<FilterProps> = ({ onFilterChange, onResetFilters }
           </span>
           <span>Filters</span>
           {activeFiltersCount > 0 && (
-            <Badge className="bg-primary text-white ml-1 shadow-sm">{activeFiltersCount}</Badge>
+            <Badge className="bg-primary text-black ml-1 shadow-sm">{activeFiltersCount}</Badge>
           )}
         </h2>
         {activeFiltersCount > 0 && (
@@ -208,7 +208,7 @@ const ProductFilter: React.FC<FilterProps> = ({ onFilterChange, onResetFilters }
               </span>
               <span>Categories</span>
               {selectedCategories.length > 0 && (
-                <Badge className="bg-primary text-white text-xs font-medium shadow-sm">
+                <Badge className="bg-primary text-black text-xs font-medium shadow-sm">
                   {selectedCategories.length}
                 </Badge>
               )}
@@ -226,10 +226,10 @@ const ProductFilter: React.FC<FilterProps> = ({ onFilterChange, onResetFilters }
                   onChange={(e) => setCategorySearch(e.target.value)}
                   className="pl-8 text-sm"
                 />
-                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
                 {categorySearch && (
                   <button 
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     onClick={() => setCategorySearch("")}
                   >
                     <FaTimes size={12} />
@@ -253,7 +253,7 @@ const ProductFilter: React.FC<FilterProps> = ({ onFilterChange, onResetFilters }
                     </div>
                   ))
                 ) : (
-                  <div className="text-sm text-gray-500 py-2 text-center">
+                  <div className="text-sm text-gray-900 py-2 text-center">
                     No categories found
                   </div>
                 )}
@@ -341,7 +341,7 @@ const ProductFilter: React.FC<FilterProps> = ({ onFilterChange, onResetFilters }
               </span>
               <span>Brands</span>
               {selectedBrands.length > 0 && (
-                <Badge className="bg-primary text-white text-xs font-medium shadow-sm">
+                <Badge className="bg-primary text-black text-xs font-medium shadow-sm">
                   {selectedBrands.length}
                 </Badge>
               )}
@@ -359,10 +359,10 @@ const ProductFilter: React.FC<FilterProps> = ({ onFilterChange, onResetFilters }
                   onChange={(e) => setBrandSearch(e.target.value)}
                   className="pl-8 text-sm"
                 />
-                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
                 {brandSearch && (
                   <button 
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     onClick={() => setBrandSearch("")}
                   >
                     <FaTimes size={12} />

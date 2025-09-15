@@ -77,14 +77,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div 
-      className="product-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border border-transparent hover:border-neutral-200"
+      className="product-card bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group border border-transparent hover:border-border"
       onClick={() => onProductClick(product)}
     >
       <div className="relative overflow-hidden">
         <img 
           src={getProductImage()} 
           alt={product.name} 
-          className="product-image w-full h-52 object-contain bg-neutral-50 p-2"
+          className="product-image w-full h-52 object-contain bg-muted p-2"
         />
         {discount > 0 && (
           <span className="absolute top-2 left-2 bg-rose-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm transform -rotate-3">
@@ -93,14 +93,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
         )}
         <div className="absolute right-0 top-2 transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:right-2 flex flex-col gap-2">
           <button 
-            className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-rose-500 transition-colors"
+            className="bg-card shadow-md hover:bg-accent p-2 rounded-full text-muted-foreground hover:text-rose-500 transition-colors"
             onClick={handleFavoriteClick}
             aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
           >
             <FaHeart className={isFavorite ? "text-rose-500" : ""} />
           </button>
           <button 
-            className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-neutral-800 transition-colors"
+            className="bg-card shadow-md hover:bg-accent p-2 rounded-full text-muted-foreground hover:text-foreground transition-colors"
             onClick={handleAddToCart}
             aria-label="Add to cart"
           >
@@ -108,7 +108,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </button>
           {onAddToCompare && (
             <button 
-              className="bg-white shadow-md hover:bg-opacity-100 p-2 rounded-full text-neutral-dark hover:text-amber-500 transition-colors"
+              className="bg-card shadow-md hover:bg-accent p-2 rounded-full text-muted-foreground hover:text-amber-500 transition-colors"
               onClick={handleAddToCompare}
               aria-label="Add to compare"
             >
@@ -117,14 +117,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
         {product.stock === 0 && (
-          <div className="absolute bottom-0 left-0 right-0 bg-neutral-800 bg-opacity-75 text-white text-center py-1 text-sm">
+          <div className="absolute bottom-0 left-0 right-0 bg-background/80 text-foreground text-center py-1 text-sm">
             Out of Stock
           </div>
         )}
       </div>
       <div className="p-4">
-        <div className="mb-1 text-sm font-medium text-gray-700">{product.category || 'General'}</div>
-        <h3 className="font-semibold text-lg mb-2 text-gray-900 group-hover:text-black transition-colors line-clamp-1">{product.name}</h3>
+        <div className="mb-1 text-sm font-medium text-muted-foreground">{product.category || 'General'}</div>
+        <h3 className="font-semibold text-lg mb-2 text-card-foreground group-hover:text-foreground transition-colors line-clamp-1">{product.name}</h3>
         <div className="flex items-center mb-2">
           <div className="flex text-amber-400 text-sm">
             <FaStar />
@@ -133,19 +133,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <FaStar />
             <FaStarHalfAlt />
           </div>
-          <span className="ml-1 text-xs text-gray-600">({Math.floor(Math.random() * 50) + 5})</span>
+          <span className="ml-1 text-xs text-muted-foreground">({Math.floor(Math.random() * 50) + 5})</span>
         </div>
         {/* Show brand if available, otherwise description */}
         {product.brand ? (
-          <p className="text-gray-700 text-sm mb-3">Brand: <span className="font-medium text-gray-900">{product.brand}</span></p>
+          <p className="text-muted-foreground text-sm mb-3">Brand: <span className="font-medium text-card-foreground">{product.brand}</span></p>
         ) : (
-          <p className="text-gray-700 text-sm line-clamp-2 mb-3">{product.description || "No description available"}</p>
+          <p className="text-muted-foreground text-sm line-clamp-2 mb-3">{product.description || "No description available"}</p>
         )}
         <div className="pt-2 border-t flex justify-between items-center">
           <div>
-            <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
+            <span className="text-lg font-bold text-foreground">${product.price.toFixed(2)}</span>
             {product.originalPrice && (
-              <span className="text-sm line-through text-gray-500 ml-1">
+              <span className="text-sm line-through text-muted-foreground ml-1">
                 ${product.originalPrice.toFixed(2)}
               </span>
             )}
