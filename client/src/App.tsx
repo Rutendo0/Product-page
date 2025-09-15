@@ -17,6 +17,7 @@ function Router() {
       <Route path="/cart" component={Cart}/>
       <Route path="/login" component={Login}/>
       <Route path="/register" component={Register}/>
+      <Route path="/search" component={Products}/>
       <Route path="/profile" component={Profile}/>
       <Route path="/orders" component={Orders}/>
       <Route component={NotFound} />

@@ -55,9 +55,6 @@ const Header = () => {
             ))}
           </nav>
           <div className="flex items-center space-x-4">
-            <Link href="/search" className="hover:text-secondary">
-              <FaSearch />
-            </Link>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
