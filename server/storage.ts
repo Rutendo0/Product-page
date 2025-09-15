@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 
 // Lightweight runtime-only types to avoid pulling in shared schema on Vercel
-export type User = { id: number; username: string; password: string };
-export type InsertUser = { username: string; password: string };
+export type User = { id: number; username: string; email: string; password: string };
+export type InsertUser = { username: string; email: string; password: string };
 
 export type Product = {
   id: number;
@@ -17,6 +18,8 @@ export type Product = {
   stock?: number;
   sku?: string;
   createdAt: Date;
+  supplier?: string;
+  make?: string;
   // Optional external fields
   OEM?: string;
   model?: string;
@@ -41,6 +44,7 @@ export type ProductFilter = {
 export type OrderItem = { productId: string; name: string; price: number; quantity: number };
 export type Order = {
   id: string;
+  userId?: number | null;
   items: OrderItem[];
   subtotal: number;
   paymentMethod: 'card' | 'mobile' | 'cash';
@@ -50,15 +54,24 @@ export type Order = {
   phone: string;
   email: string;
   notes?: string;
+  status: 'pending' | 'paid' | 'shipped' | 'delivered';
   createdAt: Date;
 };
-export type InsertOrder = Omit<Order, 'id' | 'createdAt'>;
+export type InsertOrder = Omit<Order, 'id' | 'createdAt' | 'status'>;
+
+// Session types
+export type Session = { id: number; userId: number; token: string; expiresAt: Date; createdAt: Date };
+export type InsertSession = { userId: number; token: string; expiresAt: Date };
 
 // modify the interface with any CRUD methods you might need
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  createSession(session: InsertSession): Promise<Session>;
+  getSessionByToken(token: string): Promise<Session | undefined>;
+  deleteSessionByToken(token: string): Promise<void>;
   // Product methods
   getProducts(filter?: ProductFilter): Promise<Product[]>;
   getProduct(id: string): Promise<Product | undefined>;
@@ -68,13 +81,13 @@ export interface IStorage {
   // Order methods
   createOrder(order: InsertOrder): Promise<Order>;
   listOrders(): Promise<Order[]>;
+  listUserOrders(userId: number): Promise<Order[]>;
 }
 
-import { db } from './db';
-import { orders as ordersTable, orderItems as orderItemsTable } from '@shared/schema';
+import { orders as ordersTable, orderItems as orderItemsTable, users as usersTable, sessions as sessionsTable } from '@shared/schema';
 
 export class MemStorage implements IStorage {
-  private users: Map<number, User>;
+  private users: Map<number, User> = new Map();
   private products: Map<string, Product>;
   private orders: Map<string, Order>;
   private externalApiUrl: string;
@@ -82,7 +95,6 @@ export class MemStorage implements IStorage {
   currentId: number;
 
   constructor() {
-    this.users = new Map();
     this.products = new Map();
     this.orders = new Map();
     this.currentId = 1;
@@ -90,21 +102,64 @@ export class MemStorage implements IStorage {
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
+      const { db } = await import('./db');
+      const [user] = await db.select()
+        .from(usersTable)
+        .where(eq(usersTable.id, id))
+        .limit(1);
+      if (!user) return undefined;
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+      };
+    }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
+      const { db } = await import('./db');
+      const [user] = await db.select()
+        .from(usersTable)
+        .where(eq(usersTable.username, username))
+        .limit(1);
+      if (!user) return undefined;
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+      };
+    }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
+      const { db } = await import('./db');
+      // Use DB insert
+      const [newUser] = await db.insert(usersTable)
+        .values(insertUser)
+        .returning();
+      const user: User = {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        password: newUser.password,
+      };
+      return user;
+    }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+      const { db } = await import('./db');
+      const [user] = await db.select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email))
+        .limit(1);
+      if (!user) return undefined;
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+      };
+    }
 
   private async fetchExternalProducts(): Promise<Product[]> {
     // Only fetch if we don't have products yet
@@ -158,6 +213,10 @@ export class MemStorage implements IStorage {
           if (item.year) product.year = item.year;
           // @ts-ignore
           if (item.industry) product.industry = item.industry;
+          // @ts-ignore
+          if (item.supplier) product.supplier = item.supplier;
+          // @ts-ignore
+          if (item.make) product.make = item.make;
                     
           this.products.set(product.productId, product);
         }
@@ -174,6 +233,33 @@ export class MemStorage implements IStorage {
 
   async getProducts(filter?: ProductFilter): Promise<Product[]> {
     let products = await this.fetchExternalProducts();
+  
+    // Apply supplier filter if provided
+    if (filter?.suppliers && filter.suppliers.length > 0) {
+      products = products.filter(product =>
+        product.supplier && filter.suppliers?.includes(product.supplier)
+      );
+    }
+  
+    // Apply compatibility filter
+    if (filter?.compatibility) {
+      const { make, model, year } = filter.compatibility;
+      if (make) {
+        products = products.filter(product =>
+          product.make && product.make.toLowerCase().includes(make.toLowerCase())
+        );
+      }
+      if (model) {
+        products = products.filter(product =>
+          product.model && product.model.toLowerCase().includes(model.toLowerCase())
+        );
+      }
+      if (year) {
+        products = products.filter(product =>
+          product.year && product.year.toString() === year
+        );
+      }
+    }
     
     if (filter) {
       // Apply category filter
@@ -279,44 +365,122 @@ export class MemStorage implements IStorage {
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {
-    const id = `ord_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-    const createdAt = new Date();
-
-    // Persist to Postgres
-    await db.insert(ordersTable).values({
-      id,
-      subtotal: order.subtotal,
-      paymentMethod: order.paymentMethod,
-      deliver: order.deliver,
-      location: order.location,
-      fullName: order.fullName,
-      phone: order.phone,
-      email: order.email,
-      notes: order.notes,
-      createdAt,
-    });
-
-    if (order.items?.length) {
-      await db.insert(orderItemsTable).values(
-        order.items.map((it) => ({
-          orderId: id,
-          productId: it.productId,
-          name: it.name,
-          price: it.price,
-          quantity: it.quantity,
-        }))
-      );
+      const { db } = await import('./db');
+      const id = `ord_${Date.now()}_${Math.floor(Math.random()*1000)}`;
+      const createdAt = new Date();
+  
+      // Persist to Postgres
+      await db.insert(ordersTable).values({
+        id,
+        userId: order.userId || null,
+        subtotal: order.subtotal,
+        paymentMethod: order.paymentMethod,
+        deliver: order.deliver,
+        location: order.location,
+        fullName: order.fullName,
+        phone: order.phone,
+        email: order.email,
+        notes: order.notes,
+        status: 'pending',
+        createdAt,
+      });
+  
+      if (order.items?.length) {
+        await db.insert(orderItemsTable).values(
+          order.items.map((it) => ({
+            orderId: id,
+            productId: it.productId,
+            name: it.name,
+            price: it.price,
+            quantity: it.quantity,
+          }))
+        );
+      }
+  
+      const created: Order = { id, status: 'pending', createdAt, ...order };
+      this.orders.set(id, created); // Also keep in-memory cache for quick GET
+      return created;
     }
-
-    const created: Order = { id, createdAt, ...order };
-    this.orders.set(id, created); // Also keep in-memory cache for quick GET
-    return created;
-  }
+  
+  async createSession(session: InsertSession): Promise<Session> {
+      const { db } = await import('./db');
+      const [newSession] = await db.insert(sessionsTable)
+        .values(session)
+        .returning();
+      return {
+        id: newSession.id,
+        userId: newSession.userId,
+        token: newSession.token,
+        expiresAt: newSession.expiresAt,
+        createdAt: newSession.createdAt ?? new Date(),
+      };
+    }
+  
+  async getSessionByToken(token: string): Promise<Session | undefined> {
+      const { db } = await import('./db');
+      const [session] = await db.select()
+        .from(sessionsTable)
+        .where(eq(sessionsTable.token, token));
+      if (!session) return undefined;
+      return {
+        id: session.id,
+        userId: session.userId,
+        token: session.token,
+        expiresAt: session.expiresAt,
+        createdAt: session.createdAt ?? new Date(),
+      };
+    }
+  
+  async deleteSessionByToken(token: string): Promise<void> {
+      const { db } = await import('./db');
+      await db.delete(sessionsTable)
+        .where(eq(sessionsTable.token, token));
+    }
 
   async listOrders(): Promise<Order[]> {
     // Return from cache for now; could join from DB if needed
     return Array.from(this.orders.values()).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
+
+  async listUserOrders(userId: number): Promise<Order[]> {
+      const { db } = await import('./db');
+      const orderRows = await db.select()
+        .from(ordersTable)
+        .where(eq(ordersTable.userId, userId))
+        .orderBy(ordersTable.createdAt);
+  
+      const orders: Order[] = [];
+      for (const orderRow of orderRows) {
+        const itemRows = await db.select()
+          .from(orderItemsTable)
+          .where(eq(orderItemsTable.orderId, orderRow.id));
+  
+        const orderItems: OrderItem[] = itemRows.map(item => ({
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        }));
+  
+        orders.push({
+          id: orderRow.id,
+          userId: orderRow.userId || undefined,
+          items: orderItems,
+          subtotal: orderRow.subtotal,
+          paymentMethod: orderRow.paymentMethod as 'card' | 'mobile' | 'cash',
+          deliver: orderRow.deliver,
+          location: orderRow.location || undefined,
+          fullName: orderRow.fullName,
+          phone: orderRow.phone,
+          email: orderRow.email,
+          notes: orderRow.notes || undefined,
+          status: orderRow.status as 'pending' | 'paid' | 'shipped' | 'delivered',
+          createdAt: orderRow.createdAt ?? new Date(),
+        });
+      }
+  
+      return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
 }
 
 export const storage = new MemStorage();

@@ -5,11 +5,13 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
+  email: true,
   password: true,
 });
 
@@ -60,7 +62,7 @@ export const productFilterSchema = z.object({
     .object({ make: z.string().optional(), model: z.string().optional(), year: z.string().optional() })
     .partial()
     .optional(),
-  sort: z.enum(['featured', 'price-asc', 'price-desc', 'name-asc', 'name-desc']).optional(),
+  sort: z.enum(['featured', 'price-asc', 'price-desc', 'name-asc', 'name-desc', 'newest', 'popularity', 'rating-desc']).optional(),
   page: z.number().min(1).optional(),
   limit: z.number().min(1).optional(),
 });
@@ -70,6 +72,7 @@ export type ProductFilter = z.infer<typeof productFilterSchema>;
 // Orders schema (PostgreSQL)
 export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
   subtotal: doublePrecision("subtotal").notNull(),
   paymentMethod: text("payment_method").notNull(),
   deliver: boolean("deliver").notNull(),
@@ -79,6 +82,7 @@ export const orders = pgTable("orders", {
   email: text("email").notNull(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
+  status: text("status").default("pending").notNull(),
 });
 
 export const orderItems = pgTable("order_items", {
@@ -91,7 +95,7 @@ export const orderItems = pgTable("order_items", {
 });
 
 export type OrderRow = typeof orders.$inferSelect;
-export type InsertOrderRow = typeof orders.$inferInsert;
+export type InsertOrderRow = typeof orders.$inferInsert & { userId?: number | null; status?: string };
 export type OrderItemRow = typeof orderItems.$inferSelect;
 export type InsertOrderItemRow = typeof orderItems.$inferInsert;
 
@@ -127,3 +131,15 @@ export const externalProductSchema = z.object({
 });
 
 export type ExternalProduct = z.infer<typeof externalProductSchema>;
+
+// Sessions schema for authentication
+export const sessions = pgTable("sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type SessionRow = typeof sessions.$inferSelect;
+export type InsertSessionRow = typeof sessions.$inferInsert;

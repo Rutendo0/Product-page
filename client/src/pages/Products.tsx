@@ -14,7 +14,15 @@ import { useCart } from "@/context/CartContext";
 import { Link } from "wouter";
 
 // Import the SortOption type from ProductGrid
-type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
+type SortOption =
+  | 'featured'
+  | 'price-asc'
+  | 'price-desc'
+  | 'name-asc'
+  | 'name-desc'
+  | 'newest'
+  | 'popularity'
+  | 'rating-desc';
 
 const PRODUCTS_PER_PAGE = 9;
 
@@ -23,6 +31,7 @@ const Products = () => {
   const { toast } = useToast();
   const { addToCart, count: cartCount } = useCart();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isProductInCompare, setIsProductInCompare] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<ProductFilter>({});
@@ -125,6 +134,8 @@ const Products = () => {
   }, [filters.categories, filters.brands, filters.minPrice, filters.maxPrice, searchQuery]);
   
   const handleProductClick = (product: Product) => {
+    const isInCompare = compareProducts.some(p => p.productId === product.productId);
+    setIsProductInCompare(isInCompare);
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
@@ -414,6 +425,9 @@ const Products = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAddToCart={handleAddToCart}
+        onAddToCompare={handleAddToCompare}
+        onRemoveFromCompare={handleRemoveFromCompare}
+        isInCompare={isProductInCompare}
       />
       
       {/* Product Comparison Modal */}

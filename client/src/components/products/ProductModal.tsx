@@ -32,6 +32,9 @@ interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddToCart: (product: Product, quantity: number) => void;
+  onAddToCompare?: (product: Product) => void;
+  onRemoveFromCompare?: (productId: string) => void;
+  isInCompare?: boolean;
 }
 
 const ProductModal: React.FC<ProductModalProps> = ({
@@ -39,6 +42,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
   isOpen,
   onClose,
   onAddToCart,
+  onAddToCompare = () => {},
+  onRemoveFromCompare = () => {},
+  isInCompare = false,
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -49,8 +55,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
     if (isOpen) {
       setQuantity(1);
       setCurrentImageIndex(0);
+      setIsComparing(isInCompare);
     }
-  }, [isOpen]);
+  }, [isOpen, isInCompare]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -77,15 +84,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
   };
 
   const toggleCompare = () => {
-    setIsComparing(!isComparing);
-    
-    if (!isComparing) {
-      toast({
-        title: "Added to compare",
-        description: "Product added to comparison list",
-        duration: 3000,
-      });
+    if (!product) return;
+    if (isComparing) {
+      onRemoveFromCompare(product.productId);
+    } else {
+      onAddToCompare(product);
     }
+    setIsComparing(!isComparing);
   };
 
   if (!product) return null;
@@ -138,13 +143,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   <>
                     <button 
                       onClick={prevImage} 
-                      className="absolute left-2 z-10 bg-white/80 hover:bg-white p-2 rounded-full shadow text-primary"
+                      className="absolute left-2 z-10 bg-green-500 hover:bg-white p-2 rounded-full shadow text-primary"
                     >
                       <FaArrowLeft size={16} />
                     </button>
                     <button 
                       onClick={nextImage} 
-                      className="absolute right-2 z-10 bg-white/80 hover:bg-white p-2 rounded-full shadow text-primary"
+                      className="absolute right-2 z-10 bg-green-500 hover:bg-white p-2 rounded-full shadow text-primary"
                     >
                       <FaArrowRight size={16} />
                     </button>
@@ -182,26 +187,26 @@ const ProductModal: React.FC<ProductModalProps> = ({
             </div>
             
             {/* Additional product information highlights */}
-            <div className="mt-4 bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="text-sm font-medium mb-2">Why Choose This Product</h3>
+            <div className="mt-4 bg-green-700 rounded-lg p-4 shadow-sm">
+              <h3 className="text-sm font-semibold text-white mb-2">Why Choose This Product</h3>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="flex items-center">
-                  <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
-                  <span>High Quality</span>
+                  <FaCheckCircle className="text-white mr-2 flex-shrink-0" />
+                  <span className="text-neutral-800">High Quality</span>
                 </div>
                 <div className="flex items-center">
-                  <FaShippingFast className="text-primary mr-2 flex-shrink-0" />
-                  <span>Fast Shipping</span>
+                  <FaShippingFast className="text-white mr-2 flex-shrink-0" />
+                  <span className="text-neutral-900">Fast Shipping</span>
                 </div>
                 {product.brand && (
                   <div className="flex items-center">
-                    <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
-                    <span>Trusted Brand</span>
+                    <FaCheckCircle className="text-white mr-2 flex-shrink-0" />
+                    <span className="text-neutral-900">Trusted Brand</span>
                   </div>
                 )}
                 <div className="flex items-center">
-                  <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
-                  <span>1 Year Warranty</span>
+                  <FaCheckCircle className="text-white mr-2 flex-shrink-0" />
+                  <span className="text-neutral-900">1 Year Warranty</span>
                 </div>
               </div>
             </div>
@@ -219,7 +224,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 )}
                 
                 {/* Product title */}
-                <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-2">{product.name}</h2>
                 
                 {/* Ratings */}
                 <div className="flex items-center mb-3">
@@ -244,7 +249,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 </div>
                 
                 {/* Stock status */}
-                <p className="text-green-600 font-medium flex items-center mb-4">
+                <p className="text-green-900 font-medium flex items-center mb-4">
                   <FaCheckCircle className="mr-2" /> In Stock & Ready to Ship
                 </p>
               </div>
@@ -345,13 +350,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   {(product.model || product.year) ? (
                     <div className="space-y-2">
                       <h3 className="font-medium">Compatible Vehicles</h3>
-                      <div className="bg-neutral-50 rounded-md p-4">
+                      <div className="bg-green-700 rounded-md p-4">
                         {/* @ts-ignore */}
                         {product.model && (
                           <div className="flex mb-2">
                             <span className="font-medium w-20">Model:</span>
                             {/* @ts-ignore */}
-                            <span>{product.model}</span>
+                            <span className="text-foreground">{product.model}</span>
                           </div>
                         )}
                         {/* @ts-ignore */}
@@ -359,17 +364,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
                           <div className="flex">
                             <span className="font-medium w-20">Year:</span>
                             {/* @ts-ignore */}
-                            <span>{product.year}</span>
+                            <span className="text-foreground">{product.year}</span>
                           </div>
                         )}
                       </div>
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-muted-foreground">
+                      <p className="text-foreground">
                         No specific compatibility information available for this product.
                       </p>
-                      <p className="text-sm mt-2">
+                      <p className="text-sm text-foreground mt-2">
                         Please check your vehicle specifications or contact customer support for compatibility information.
                       </p>
                     </div>
@@ -381,25 +386,25 @@ const ProductModal: React.FC<ProductModalProps> = ({
               <div className="mt-auto border-t pt-4">
                 <div className="flex items-center mb-4">
                   <div className="mr-4">
-                    <label htmlFor="modal-quantity" className="block text-sm font-medium mb-1">Quantity</label>
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                      <button 
+                    <label htmlFor="modal-quantity" className="block text-base font-bold text-white mb-1">Quantity</label>
+                    <div className="flex items-center border border-green-200 rounded-md overflow-hidden bg-white">
+                      <button
                         onClick={decreaseQuantity}
-                        className="px-3 py-1 bg-neutral hover:bg-neutral-dark hover:text-white transition-colors"
+                        className="px-3 py-2 bg-white text-neutral-900 hover:bg-green-900 transition-colors border-r border-neutral-300"
                       >
                         -
                       </button>
-                      <input 
-                        id="modal-quantity" 
-                        type="number" 
-                        value={quantity} 
-                        min="1" 
+                      <input
+                        id="modal-quantity"
+                        type="number"
+                        value={quantity}
+                        min="1"
                         onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-12 text-center border-none focus:ring-0"
+                        className="w-12 text-center border-none focus:ring-0 text-neutral-900 bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <button 
+                      <button
                         onClick={increaseQuantity}
-                        className="px-3 py-1 bg-neutral hover:bg-neutral-dark hover:text-white transition-colors"
+                        className="px-3 py-2 bg-white text-neutral-900 hover:bg-green-900 transition-colors border-l border-neutral-300"
                       >
                         +
                       </button>
