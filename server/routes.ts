@@ -299,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2024-06-20',
+        apiVersion: '2024-11-20',
       });
 
       const paymentIntent = await stripe.paymentIntents.create({
