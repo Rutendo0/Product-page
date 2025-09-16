@@ -204,7 +204,20 @@ const Products = () => {
   };
   
   return (
-    <div className="min-h-screen bg-green-950/95">
+    <div className="relative min-h-screen bg-green-950/95">
+      {/* Subtle site-themed background */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-32 -left-32 h-[480px] w-[480px] rounded-full bg-green-600/20 blur-3xl"></div>
+        <div className="absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full bg-emerald-400/15 blur-3xl"></div>
+        <svg className="absolute inset-0 h-full w-full text-white/70 opacity-10" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M32 0H0V32" fill="none" stroke="currentColor" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
       {/* Page title section with gradient background */}
       <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white py-12 shadow-lg">
         <div className="container mx-auto px-4">
@@ -316,7 +329,7 @@ const Products = () => {
               <div className="bg-card rounded-xl shadow-md p-5 mb-6 border border-border">
                 <div className="flex flex-wrap justify-between items-center">
                   <p className="text-muted-foreground">
-                    Showing <span className="font-semibold text-primary">{filteredProducts.length}</span> of <span className="font-semibold text-primary">{totalFilteredProducts}</span> products
+                    Showing <span className="font-semibold text-primary">{products.length}</span> of <span className="font-semibold text-primary">{totalFilteredProducts}</span> products
                   </p>
                   
                   {(selectedBrands.length > 0 || selectedCategories.length > 0) && (
@@ -344,7 +357,7 @@ const Products = () => {
             )}
             
             <ProductGrid
-              products={filteredProducts}
+              products={products}
               isLoading={isLoading}
               error={error as Error}
               totalProducts={totalFilteredProducts}
@@ -356,7 +369,7 @@ const Products = () => {
               onResetFilters={handleResetFilters}
             />
 
-            {!isLoading && !error && filteredProducts.length > 0 && (
+            {!isLoading && !error && products.length > 0 && (
               <ProductPagination
                 currentPage={currentPage}
                 totalPages={totalPages}

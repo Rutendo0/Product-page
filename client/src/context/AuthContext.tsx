@@ -2,11 +2,7 @@ import React, { createContext, useContext, useMemo, useCallback, ReactNode } fro
 import { useUser, useAuth as useClerkAuth, useClerk } from "@clerk/clerk-react";
 import { User } from "@shared/schema";
 
-type ClerkUser = Omit<User, 'password'> & {
-  isSeller?: boolean;
-  businessName?: string;
-  businessDescription?: string;
-};
+type ClerkUser = Omit<User, 'password' | 'id'> & { id: string };
 
 type AuthContextType = {
   user: ClerkUser | null;
@@ -21,6 +17,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const clerkAuth = useClerkAuth();
   const { user: clerkUser, isLoaded } = useUser();
+  // Normalize Clerk user shape for our app
+  const normalizedUser = useMemo(() => {
+    if (!clerkUser) return null;
+    return {
+      id: clerkUser.id,
+      username: clerkUser.username || clerkUser.emailAddresses[0]?.emailAddress || "",
+      email: clerkUser.emailAddresses[0]?.emailAddress || "",
+    } as ClerkUser;
+  }, [clerkUser]);
 
   const logout = useCallback(async () => {
     await clerkAuth.signOut();
@@ -37,23 +42,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [clerkAuth]);
 
   const value = useMemo(() => ({
-    user: clerkUser ? {
-      id: parseInt(clerkUser.id),
-      username: clerkUser.username || clerkUser.emailAddresses[0].emailAddress,
-      email: clerkUser.emailAddresses[0].emailAddress,
-      // Ensure strict boolean for isSeller
-      isSeller: Boolean((clerkUser.publicMetadata as any)?.isSeller),
-      businessName: (clerkUser.publicMetadata as any)?.businessName,
-      businessDescription: (clerkUser.publicMetadata as any)?.businessDescription,
-      // Optional: expose raw metadata for debugging in Profile
-      // @ts-ignore
-      _rawPublicMetadata: clerkUser.publicMetadata,
-    } : null,
+    user: normalizedUser,
     isAuthenticated: !!clerkAuth.isSignedIn,
     logout,
     loading: !isLoaded,
     getToken,
-  }), [clerkUser, clerkAuth.isSignedIn, isLoaded, logout, getToken]);
+  }), [normalizedUser, clerkAuth.isSignedIn, isLoaded, logout, getToken]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

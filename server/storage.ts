@@ -76,22 +76,15 @@ export interface IStorage {
   getProductCategories(): Promise<string[]>;
   getProductBrands(): Promise<string[]>;
   getMinMaxPrices(): Promise<{ min: number; max: number }>;
-  getSellerProducts(sellerId: number): Promise<Product[]>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  getSellerStats(sellerId: number): Promise<{ totalSales: number; pendingOrders: number; activeProducts: number; monthlyRevenue: number; recentOrders: Order[] }>;
   createOrder(order: InsertOrder): Promise<Order>;
   listOrders(): Promise<Order[]>;
   listUserOrders(userId: number): Promise<Order[]>;
-  getSellerSettings(userId: number): Promise<SellerProfile | undefined>;
-  updateSellerSettings(userId: number, settings: InsertSellerProfile): Promise<SellerProfile>;
 }
 
-import { orders as ordersTable, orderItems as orderItemsTable, users as usersTable, sessions as sessionsTable, sellerProfiles } from '@shared/schema';
-import { SellerProfile, InsertSellerProfile } from '@shared/schema';
+import { orders as ordersTable, orderItems as orderItemsTable, users as usersTable, sessions as sessionsTable } from '@shared/schema';
 
 export class MemStorage implements IStorage {
   private products: Map<string, Product> = new Map();
-  private sellerProducts: Map<number, Map<string, Product>> = new Map();
   private orders: Map<string, Order> = new Map();
   private externalApiUrl: string = 'https://c-ag.vercel.app/api/products';
 
@@ -353,63 +346,6 @@ export class MemStorage implements IStorage {
     return { min, max };
   }
 
-  async getSellerProducts(sellerId: number): Promise<Product[]> {
-    await this.fetchExternalProducts();
-    const sellerMap = this.sellerProducts.get(sellerId);
-    return sellerMap ? Array.from(sellerMap.values()) : [];
-  }
-
-  async createProduct(product: InsertProduct): Promise<Product> {
-    await this.fetchExternalProducts();
-    const id = this.currentId++;
-    const createdAt = new Date();
-    const fullProduct: Product = {
-      ...product,
-      id,
-      productId: product.productId || `prod-${id}`,
-      createdAt,
-    };
-    this.products.set(fullProduct.productId, fullProduct);
-    if (fullProduct.sellerId) {
-      let sellerMap = this.sellerProducts.get(fullProduct.sellerId);
-      if (!sellerMap) {
-        sellerMap = new Map();
-        this.sellerProducts.set(fullProduct.sellerId, sellerMap);
-      }
-      sellerMap.set(fullProduct.productId, fullProduct);
-    }
-    return fullProduct;
-  }
-
-  async getSellerStats(sellerId: number): Promise<{ totalSales: number; pendingOrders: number; activeProducts: number; monthlyRevenue: number; recentOrders: Order[] }> {
-    const sellerProducts = await this.getSellerProducts(sellerId);
-    const activeProducts = sellerProducts.length;
-
-    const allOrders = Array.from(this.orders.values());
-    const sellerOrders = allOrders.filter(order => 
-      order.items.some(item => 
-        sellerProducts.some(p => p.productId === item.productId)
-      )
-    );
-
-    const pendingOrders = sellerOrders.filter(o => o.status === 'pending').length;
-    const totalSales = sellerOrders.reduce((sum, o) => sum + o.subtotal, 0);
-    const monthlyRevenue = sellerOrders
-      .filter(o => new Date(o.createdAt).getMonth() === new Date().getMonth() && new Date(o.createdAt).getFullYear() === new Date().getFullYear())
-      .reduce((sum, o) => sum + o.subtotal, 0);
-
-    const recentOrders = sellerOrders
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 5);
-
-    return {
-      totalSales,
-      pendingOrders,
-      activeProducts,
-      monthlyRevenue,
-      recentOrders,
-    };
-  }
 
   async createOrder(order: InsertOrder): Promise<Order> {
     const { db } = await import('./db');
@@ -527,29 +463,6 @@ export class MemStorage implements IStorage {
     return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  async getSellerSettings(userId: number): Promise<SellerProfile | undefined> {
-    const { db } = await import('./db');
-    const [profile] = await db.select().from(sellerProfiles).where(eq(sellerProfiles.userId, userId));
-    return profile;
-  }
-
-  async updateSellerSettings(userId: number, settings: InsertSellerProfile): Promise<SellerProfile> {
-    const { db } = await import('./db');
-    const existing = await this.getSellerSettings(userId);
-    const now = new Date();
-
-    if (existing) {
-      const [updated] = await db.update(sellerProfiles)
-        .set({ ...settings, updatedAt: now })
-        .where(eq(sellerProfiles.userId, userId))
-        .returning();
-      return updated;
-    } else {
-      const toInsert = { ...settings, userId, createdAt: now, updatedAt: now };
-      const [newProfile] = await db.insert(sellerProfiles).values(toInsert).returning();
-      return newProfile;
-    }
-  }
 }
 
 export const storage = new MemStorage();

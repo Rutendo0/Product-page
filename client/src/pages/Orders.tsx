@@ -1,4 +1,4 @@
-
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +28,7 @@ interface Order {
 }
 
 const Orders = () => {
-  const { getToken } = useAuth();
+  const { getToken, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
@@ -51,16 +51,20 @@ const Orders = () => {
 
       return response.json();
     },
-    enabled: !!getToken,
+    // Only run when we have an auth token function and user is signed in
+    enabled: isAuthenticated && typeof getToken === "function",
+    staleTime: 60000,
   });
 
-  if (error) {
-    toast({
-      title: "Error",
-      description: "Failed to load orders",
-      variant: "destructive",
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load orders",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   if (isLoading) {
     return (

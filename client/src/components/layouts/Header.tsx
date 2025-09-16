@@ -103,7 +103,7 @@ const Header = () => {
                       <Link href="/login">Login</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/seller-register">Register</Link>
+                      <Link href="/register">Register</Link>
                     </DropdownMenuItem>
                   </>
                 )}
