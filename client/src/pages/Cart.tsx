@@ -12,7 +12,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 const Cart = () => {
   const { items, subtotal, addToCart, removeFromCart, clearCart } = useCart();
   const { toast } = useToast();
-  const { user, token, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, getToken } = useAuth();
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
@@ -165,11 +165,12 @@ const CheckoutForm = ({ items, subtotal, clearCart, toast, setCheckoutOpen, toke
           throw new Error('Stripe.js has not loaded.');
         }
 
+        const authToken = await getToken();
         const response = await fetch('/api/create-payment-intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
           },
           body: JSON.stringify({ amount: subtotal }),
         });
@@ -215,11 +216,12 @@ const CheckoutForm = ({ items, subtotal, clearCart, toast, setCheckoutOpen, toke
         ...(isAuthenticated && user && { userId: user.id }),
       };
 
+      const authToken = await getToken();
       const orderResponse = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
         body: JSON.stringify(body),
       });
