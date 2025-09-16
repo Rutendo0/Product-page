@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { FaSearch, FaBars, FaUser } from "react-icons/fa";
+import { FaSearch, FaBars, FaUser, FaSun, FaMoon } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import {
   Avatar,
   AvatarFallback,
@@ -15,12 +16,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Switch,
+} from "@/components/ui/switch";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
 
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const navItems = [
     { name: "Products", path: "/" },
@@ -31,7 +36,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-green-950 text-white">
+    <header className="bg-background text-foreground border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
@@ -46,8 +51,8 @@ const Header = () => {
                 href={item.path}
                 className={
                   location === item.path
-                    ? "text-secondary font-medium"
-                    : "hover:text-secondary"
+                    ? "text-foreground font-medium"
+                    : "hover:text-foreground/80"
                 }
               >
                 {item.name}
@@ -63,7 +68,7 @@ const Header = () => {
                     <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 ) : (
-                  <button type="button" className="p-0 border-none bg-transparent hover:text-secondary">
+                  <button type="button" className="p-0 border-none bg-transparent hover:text-foreground/80">
                     <FaUser className="h-5 w-5" />
                   </button>
                 )}
@@ -98,12 +103,23 @@ const Header = () => {
                       <Link href="/login">Login</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/register">Register</Link>
+                      <Link href="/seller-register">Register</Link>
                     </DropdownMenuItem>
                   </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <div className="flex items-center space-x-2">
+              <span className="sr-only">Toggle theme</span>
+              <FaSun className={`h-4 w-4 ${isDark ? 'text-muted-foreground' : 'text-foreground'}`} />
+              <Switch
+                checked={isDark}
+                onCheckedChange={toggleTheme}
+                aria-label="Toggle dark mode"
+              />
+              <FaMoon className={`h-4 w-4 ${isDark ? 'text-foreground' : 'text-muted-foreground'}`} />
+            </div>
 
             <button
               onClick={toggleMobileMenu}
@@ -116,7 +132,7 @@ const Header = () => {
         </div>
       </div>
       {/* Mobile menu */}
-      <div className={`md:hidden ${mobileMenuOpen ? "block" : "hidden"} bg-primary-light`}>
+      <div className={`md:hidden ${mobileMenuOpen ? "block" : "hidden"} bg-background border-t border-border`}>
         <div className="container mx-auto px-4 py-3 space-y-3">
           {navItems.map((item) => (
             <Link
@@ -124,8 +140,8 @@ const Header = () => {
               href={item.path}
               className={
                 location === item.path
-                  ? "block text-secondary font-medium"
-                  : "block hover:text-secondary"
+                  ? "block text-foreground font-medium"
+                  : "block hover:text-foreground/80"
               }
               onClick={() => setMobileMenuOpen(false)}
             >

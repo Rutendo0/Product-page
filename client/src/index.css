@@ -3,9 +3,59 @@
 @tailwind utilities;
 
 @layer base {
-  /* Dark theme tokens: deep green, near-black backgrounds, minimal white */
+  /* Light theme tokens: light backgrounds, dark text, green accents */
   :root {
     /* Core surfaces */
+    --background: 0 0% 98%;             /* light gray */
+    --foreground: 0 0% 12%;             /* dark text */
+
+    /* Cards and popovers */
+    --card: 0 0% 100%;                 /* white */
+    --card-foreground: 0 0% 12%;       /* dark text */
+    --popover: 0 0% 100%;              /* white */
+    --popover-foreground: 0 0% 12%;    /* dark text */
+
+    /* Brand colors (dark green focus) */
+    --primary: 150 60% 28%;             /* dark green */
+    --primary-foreground: 0 0% 100%;    /* white */
+    --secondary: 150 60% 95%;           /* light green */
+    --secondary-foreground: 0 0% 12%;   /* dark text */
+
+    /* Subtle surfaces */
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 50%;
+    --accent: 0 0% 97%;
+    --accent-foreground: 0 0% 12%;
+
+    /* Status */
+    --destructive: 0 72% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Controls and outlines */
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 150 60% 28%;
+
+    /* Charts (adjusted for light) */
+    --chart-1: 150 60% 45%;
+    --chart-2: 155 45% 42%;
+    --chart-3: 145 50% 38%;
+    --chart-4: 160 35% 36%;
+    --chart-5: 140 40% 40%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;     /* light gray */
+    --sidebar-foreground: 0 0% 12%;     /* dark text */
+    --sidebar-primary: 150 60% 28%;     /* dark green */
+    --sidebar-primary-foreground: 0 0% 100%; /* white */
+    --sidebar-accent: 150 60% 95%;      /* light green */
+    --sidebar-accent-foreground: 0 0% 12%; /* dark text */
+    --sidebar-border: 0 0% 88%;         /* light border */
+    --sidebar-ring: 150 60% 28%;        /* green ring */
+  }
+
+  .dark {
+    /* Dark theme tokens: deep green, near-black backgrounds, minimal white */
     --background: 210 20% 6%;           /* near-black */
     --foreground: 0 0% 96%;             /* off-white for good contrast */
 

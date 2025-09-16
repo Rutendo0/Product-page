@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, doublePrecision, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -31,6 +32,7 @@ export const products = pgTable("products", {
   brand: text("brand"),
   stock: integer("stock").default(0),
   sku: text("sku"),
+  sellerId: integer("seller_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -143,3 +145,25 @@ export const sessions = pgTable("sessions", {
 
 export type SessionRow = typeof sessions.$inferSelect;
 export type InsertSessionRow = typeof sessions.$inferInsert;
+
+// Seller profiles schema
+export const sellerProfiles = pgTable("seller_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull().unique(),
+  storeName: text("store_name").notNull(),
+  bio: text("bio"),
+  address: text("address").notNull(),
+  phone: text("phone").notNull(),
+  bankAccount: text("bank_account"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => sql`now()`),
+});
+
+export const insertSellerProfileSchema = createInsertSchema(sellerProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export type InsertSellerProfile = z.infer<typeof insertSellerProfileSchema>;
+export type SellerProfile = typeof sellerProfiles.$inferSelect;

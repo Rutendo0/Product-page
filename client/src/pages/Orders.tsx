@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 
 interface Order {
   id: string;
@@ -28,13 +28,16 @@ interface Order {
 }
 
 const Orders = () => {
-  const { token } = useAuth();
+  const { getToken } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   const { data: orders, isLoading, error } = useQuery<Order[]>({
     queryKey: ["orders"],
     queryFn: async () => {
+      const token = await getToken();
+      if (!token) throw new Error("No token available");
+
       const response = await fetch("/api/orders", {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -48,7 +51,7 @@ const Orders = () => {
 
       return response.json();
     },
-    enabled: !!token,
+    enabled: !!getToken,
   });
 
   if (error) {

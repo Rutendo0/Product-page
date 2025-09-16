@@ -49,12 +49,13 @@ const Products = () => {
   // Calculate compare count
   const compareCount = compareProducts.length;
   
-  // Generate query key based on filters and pagination
+  // Generate query key based on filters, search, and pagination
   const queryKey = [
     '/api/products',
     {
       categories: filters.categories,
       brands: filters.brands,
+      search: searchQuery,
       minPrice: filters.minPrice,
       maxPrice: filters.maxPrice,
       sort: filters.sort,
@@ -63,68 +64,15 @@ const Products = () => {
     }
   ];
   
-  // Query to get products
-  const { data: products = [], isLoading, error, refetch } = useQuery<Product[]>({
+  // Query to get products and total count
+  const { data, isLoading, error, refetch } = useQuery<{ products: Product[]; total: number }>({
     queryKey,
     placeholderData: (previousData) => previousData,  // similar to keepPreviousData in v4
     staleTime: 60000, // 1 minute
   });
   
-  // Get the total number of products (without pagination)
-  const { data: allProducts = [] } = useQuery<Product[]>({
-    queryKey: ['/api/products'],
-    enabled: !isLoading && products.length > 0,
-    staleTime: 60000, // 1 minute
-  });
-  
-  // Filter products by search query
-  const filteredProducts = products.filter(product => {
-    if (!searchQuery) return true;
-    
-    const query = searchQuery.toLowerCase();
-    return (
-      product.name.toLowerCase().includes(query) || 
-      (product.description && product.description.toLowerCase().includes(query)) ||
-      (product.brand && product.brand.toLowerCase().includes(query)) ||
-      (product.category && product.category.toLowerCase().includes(query))
-    );
-  });
-  
-  // Calculate the total pages for filtered products
-  const totalFilteredProducts = allProducts.filter(product => {
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const nameMatch = product.name.toLowerCase().includes(query);
-      const descMatch = product.description && product.description.toLowerCase().includes(query);
-      const brandMatch = product.brand && product.brand.toLowerCase().includes(query);
-      const categoryMatch = product.category && product.category.toLowerCase().includes(query);
-      
-      if (!(nameMatch || descMatch || brandMatch || categoryMatch)) {
-        return false;
-      }
-    }
-    
-    // Apply category filter
-    if (filters.categories?.length && product.category && !filters.categories.includes(product.category)) {
-      return false;
-    }
-    
-    // Apply brand filter
-    if (filters.brands?.length && product.brand && !filters.brands.includes(product.brand)) {
-      return false;
-    }
-    
-    // Apply price filter
-    if (filters.minPrice !== undefined && product.price < filters.minPrice) {
-      return false;
-    }
-    if (filters.maxPrice !== undefined && product.price > filters.maxPrice) {
-      return false;
-    }
-    
-    return true;
-  }).length;
+  const products = data?.products || [];
+  const totalFilteredProducts = data?.total || 0;
   
   const totalPages = Math.ceil(totalFilteredProducts / PRODUCTS_PER_PAGE);
   
