@@ -136,6 +136,27 @@ const Products = () => {
     setSelectedCategories([]);
     setSelectedBrands([]);
   };
+
+  const handleCategorySelect = (category: string) => {
+    // If clicking the same category, deselect it
+    if (selectedCategories.includes(category)) {
+      const newCategories = selectedCategories.filter(c => c !== category);
+      setSelectedCategories(newCategories);
+      setFilters(prev => ({
+        ...prev,
+        categories: newCategories.length > 0 ? newCategories : undefined
+      }));
+    } else {
+      // If clicking a different category, select it (single selection for popular categories)
+      const newCategories = [category];
+      setSelectedCategories(newCategories);
+      setFilters(prev => ({
+        ...prev,
+        categories: newCategories
+      }));
+    }
+    setCurrentPage(1);
+  };
   
   const handleRetry = () => {
     refetch();
@@ -219,37 +240,46 @@ const Products = () => {
         </svg>
       </div>
       {/* Page title section with gradient background */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white py-12 shadow-lg">
+      <section
+        className="text-white py-16 shadow-lg relative"
+        style={{
+          backgroundImage: `linear-gradient(to bottom right, rgba(22, 101, 52, 0.6), rgba(20, 83, 45, 0.6), rgba(15, 68, 38, 0.6)), url('https://img.freepik.com/premium-photo/set-car-parts-background_488220-34293.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+          {/* Icons positioned at top right, closer to header */}
+          <div className="absolute top-4 right-4 flex items-center gap-4 z-10">
+            {/* Compare button with counter and animation */}
+            <button
+              onClick={openCompareModal}
+              className="relative bg-card hover:bg-accent text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105"
+            >
+              <FaExchangeAlt size={20} />
+              {compareCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
+                  {compareCount}
+                </Badge>
+              )}
+            </button>
+
+            {/* Shopping cart button with counter and animation */}
+            <Link href="/cart" className="relative bg-card hover:bg-accent text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
+              <FaShoppingCart size={22} />
+              {cartCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-rose-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
+                  {cartCount}
+                </Badge>
+              )}
+            </Link>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pt-16">
             <div className="max-w-2xl">
               <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Car Parts Marketplace</h1>
               <p className="mt-3 text-lg text-white/90 max-w-xl">Shop OEM and aftermarket car parts by make, model, and year. Compare prices and suppliers to get the best deal.</p>
-            </div>
-            
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-              {/* Compare button with counter and animation */}
-              <button 
-                onClick={openCompareModal}
-                className="relative bg-card hover:bg-accent text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105"
-              >
-                <FaExchangeAlt size={20} />
-                {compareCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
-                    {compareCount}
-                  </Badge>
-                )}
-              </button>
-              
-              {/* Shopping cart button with counter and animation */}
-              <Link href="/cart" className="relative bg-card hover:bg-accent text-primary p-3 rounded-full shadow-md transition-all hover:shadow-lg hover:scale-105">
-                <FaShoppingCart size={22} />
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-rose-600 text-white text-xs font-bold rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-sm">
-                    {cartCount}
-                  </Badge>
-                )}
-              </Link>
             </div>
           </div>
           
@@ -283,10 +313,46 @@ const Products = () => {
           
           {/* Popular categories */}
           <div className="flex flex-wrap mt-6 gap-2 justify-center">
-            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Original Equipment</span>
-            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Aftermarket</span>
-            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Performance Parts</span>
-            <span className="bg-secondary/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/50 cursor-pointer transition-colors">Special Offers</span>
+            <button
+              onClick={() => handleCategorySelect("Original Equipment")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategories.includes("Original Equipment")
+                  ? "bg-primary text-primary-foreground shadow-md scale-105"
+                  : "bg-secondary/40 backdrop-blur-sm hover:bg-secondary/60 text-foreground hover:scale-105"
+              }`}
+            >
+              Original Equipment
+            </button>
+            <button
+              onClick={() => handleCategorySelect("Aftermarket")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategories.includes("Aftermarket")
+                  ? "bg-primary text-primary-foreground shadow-md scale-105"
+                  : "bg-secondary/40 backdrop-blur-sm hover:bg-secondary/60 text-foreground hover:scale-105"
+              }`}
+            >
+              Aftermarket
+            </button>
+            <button
+              onClick={() => handleCategorySelect("Performance Parts")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategories.includes("Performance Parts")
+                  ? "bg-primary text-primary-foreground shadow-md scale-105"
+                  : "bg-secondary/40 backdrop-blur-sm hover:bg-secondary/60 text-foreground hover:scale-105"
+              }`}
+            >
+              Performance Parts
+            </button>
+            <button
+              onClick={() => handleCategorySelect("Special Offers")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategories.includes("Special Offers")
+                  ? "bg-primary text-primary-foreground shadow-md scale-105"
+                  : "bg-secondary/40 backdrop-blur-sm hover:bg-secondary/60 text-foreground hover:scale-105"
+              }`}
+            >
+              Special Offers
+            </button>
           </div>
         </div>
       </section>
