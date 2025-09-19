@@ -7,12 +7,35 @@ import { useState, useEffect } from "react";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
+// Type definitions
+interface CartItem {
+  product: any;
+  quantity: number;
+}
+
+interface CheckoutFormProps {
+  items: CartItem[];
+  subtotal: number;
+  clearCart: () => void;
+  toast: any;
+  setCheckoutOpen: (open: boolean) => void;
+  user: any;
+  isAuthenticated: boolean;
+}
+
+interface CheckoutErrors {
+  fullName: string;
+  phone: string;
+  email: string;
+  location: string;
+}
+
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
 const Cart = () => {
   const { items, subtotal, addToCart, removeFromCart, clearCart } = useCart();
   const { toast } = useToast();
-  const { user, isAuthenticated, getToken } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
@@ -105,7 +128,6 @@ const Cart = () => {
                   clearCart={clearCart}
                   toast={toast}
                   setCheckoutOpen={setCheckoutOpen}
-                  token={token}
                   user={user}
                   isAuthenticated={isAuthenticated}
                 />
@@ -125,7 +147,8 @@ const Cart = () => {
   );
 };
 
-const CheckoutForm = ({ items, subtotal, clearCart, toast, setCheckoutOpen, token, user, isAuthenticated }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ items, subtotal, clearCart, toast, setCheckoutOpen, user, isAuthenticated }) => {
+  const { getToken } = useAuth();
   const [paymentMethod, setPaymentMethod] = useState<"card" | "mobile" | "cash">("card");
   const [deliver, setDeliver] = useState(true);
   const [location, setLocation] = useState("");
@@ -134,7 +157,7 @@ const CheckoutForm = ({ items, subtotal, clearCart, toast, setCheckoutOpen, toke
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({ fullName: "", phone: "", email: "", location: "" });
+  const [errors, setErrors] = useState<CheckoutErrors>({ fullName: "", phone: "", email: "", location: "" });
 
   const stripe = useStripe();
   const elements = useElements();
@@ -147,7 +170,7 @@ const CheckoutForm = ({ items, subtotal, clearCart, toast, setCheckoutOpen, toke
   }, [isAuthenticated, user]);
 
   const handleConfirmOrder = async () => {
-    const newErrors = {};
+    const newErrors: Partial<CheckoutErrors> = {};
 
     if (fullName.trim().length < 3) newErrors.fullName = "Please enter your full name (min 3 chars).";
     if (!/^(\+?\d[\d\s-]{6,}\d)$/.test(phone.trim())) newErrors.phone = "Enter a valid phone number.";
